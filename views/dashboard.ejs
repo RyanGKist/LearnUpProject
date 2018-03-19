@@ -15,6 +15,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Dashboard</title>
+    <!-- <script type="text/javascript">
+        $(document).ready(function(){
+            $('#genRoomButton').click(function(){
+                    var chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz";
+                    var string_length = 10;
+                    var uniqueRoomId = '';
+                    for (var i=0; i<string_length; i++) {
+                        var rnum = Math.floor(Math.random() * chars.length);
+                        uniqueRoomId += chars.substring(rnum,rnum+1);
+                    }
+                $('#meetingurl').val(`www.localhost:8000/room/${uniqueRoomId}`);
+                $('#enterRoom').removeAttr('disabled');
+                $('#enterRoom').removeClass("disabled");
+            })
+        })
+    </script> -->
     <script type="text/javascript" src="/socket.io/socket.io.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.17.0/dist/jquery.validate.min.js"></script>
     
@@ -132,7 +148,7 @@
                             </div>
                             <form id="enterRoom" class="col-md-4" method="get">
                                 <div class="form-group">
-                                    <button type="submit" name="" id="enterRoomButton" class="btn btn-primary disabled">Enter Room</button>
+                                    <button type="submit" name="" id="enterRoomButton" class="btn btn-primary disabled" disabled>Enter Room</button>
                                 </div>
                             </form>
                         </div>
@@ -256,24 +272,26 @@
 </body>
 
 <script type="text/javascript">
-    document.getElementById('genRoomButton').addEventListener('click', createRoom)
+    document.getElementById('genRoomButton').addEventListener('click', createRoom);
     var deleteButtons = document.querySelectorAll('.deleteuser');
-    var socket = io.connect()
+    var socket = io.connect();
 
     for (var i = 0; i < deleteButtons.length; i++) {
-        deleteButtons[i].addEventListener('click', deleteClicked)
+        deleteButtons[i].addEventListener('click', deleteClicked);
     }
 
     function deleteClicked() {
-        document.getElementById('deleteform').setAttribute("action", "/delete/" + this.id)
+        document.getElementById('deleteform').setAttribute("action", "/delete/" + this.id);
     }
 
     function createRoom() {
-        var room = document.getElementById('genRoomButton').getAttribute('name')
-        document.getElementById('enterRoomButton').classList.remove("disabled")
-        document.getElementById('enterRoom').setAttribute("action", "/room/" + room)
-        document.getElementById("meetingurl").setAttribute("value", "http://localhost:8000/room/" + room)
-        socket.emit('create', room)
+        var room = document.getElementById('genRoomButton').getAttribute('name');
+        document.getElementById('enterRoomButton').classList.remove("disabled");
+        $('#enterRoom').removeAttr('disabled');
+
+        document.getElementById('enterRoom').setAttribute("action", "/room/" + room);
+        document.getElementById("meetingurl").setAttribute("value", "http://localhost:8000/room/" + room);
+        socket.emit('create', room);
     }
 
     socket.on('user_joined', function (data) {
