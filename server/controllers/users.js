@@ -24,20 +24,24 @@ module.exports = {
   login (request, response) {
     User.findOne({ email: request.body.email })
       .then((result) => {
+        console.log("This is result in login", result);
         bcrypt.compare(request.body.password, result.hash)
-        .then(() =>{
-          request.session.user = request.body.email;
-          response.redirect('/admin/dashboard');
-        })
-        .catch((err) =>{
-          console.log('Error received on bcrypt compare, ', err);
-          request.flash('error', 'Incorrect password (or username) ');
-          response.redirect('/admin');
-        });
+        .then((res)=>{
+          if(res){
+            console.log("went to then in login",res)
+            request.session.user = request.body.email;
+            response.redirect('/admin/dashboard');
+          }
+          else {
+            console.log('Error received on bcrypt compare, ');
+            request.flash('error', 'Incorrect password ');
+            response.redirect('/admin');
+          }
+          });
       })
       .catch((error) => {
         console.log('Did not find this user email address, ', error);
-        request.flash('error', 'Incorrect username (or password)');
+        request.flash('error', 'Incorrect password');
         response.redirect('/admin');
       });
   },
