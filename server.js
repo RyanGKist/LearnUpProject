@@ -38,6 +38,9 @@ const connection = mongoose.createConnection("mongodb://localhost/learnup-db/ses
 // Because we import the mongoose.js file first, the mongoose is already set up with a promiseLibrary. Otherwise do:
 // mongoose.createConnection("mongodb://localhost/learnup-db/session", {promiseLibrary: global.Promise});
 
+
+
+
 // Tell express 'app' to use 'session', and
 // give 'session' a dummy string for encryption:
 app.use(session({ secret: 'codingdojorocks',
@@ -124,13 +127,13 @@ io.sockets.on('connection', (socket) => {
   });
 
   socket.on('create', (room) => {
-    console.log('joined room');
+    console.log('joined room'+room);
     socket.join(room);
     io.to(room).emit('user_joined', { response: `user joined room ${room}` });
   });
 
   socket.on('join room', (room) => {
-    console.log('joined room');
+    console.log('joined room' + room);
     socket.join(room);
     io.to(room).emit('user_joined', { response: `user joined room ${room}` });
   });
@@ -154,4 +157,9 @@ io.sockets.on('connection', (socket) => {
   socket.on('reset', (data) => {
     socket.broadcast.to(data.room).emit('reset_tiles');
   });
+
+  socket.on('switch', (data) => {
+    socket.broadcast.to(data.room).emit('switch_boards');
+  });
+
 });

@@ -82,19 +82,20 @@ User.findOne({ email: 'omar.ihmoda@gmail.com' }, (error, result) => {
 });
 
 // ADD TILES TO DB (if database not yet populated)
-const tiles = require('../../static/tiles.json');
+const tilesSideOne = require('../../static/tilesSideOne.json');
+const tilesSideTwo = require('../../static/tilesSideTwo.json');
 
 const Sideone = mongoose.model('Sideone');
 const Sidetwo = mongoose.model('Sidetwo');
 
-function addTiles(tiles) {
+function addTiles(tilesSideOne, tilesSideTwo) {
   const {
     starstop, starsleft, starsright, starsbottom, dipper, crescent, earth,
-  } = tiles.sideone;
+  } = tilesSideOne.sideone;
 
   const {
     prefixes, endingsright, endingsbottom, roots,
-  } = tiles.sidetwo;
+  } = tilesSideTwo.sidetwo;
 
   Sideone.create({
     starstop,
@@ -119,6 +120,15 @@ function addTiles(tiles) {
 }
 
 Sideone.findOne({})
+  .then((tile) => {
+    if (tile) {
+    } else {
+      addTiles(tiles);
+    }
+  })
+  .catch(error => console.log(error));
+
+Sidetwo.findOne({})
   .then((tile) => {
     if (tile) {
     } else {

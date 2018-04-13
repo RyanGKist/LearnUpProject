@@ -166,22 +166,23 @@ module.exports = {
           else {
             isadmin = false;
           }
-          var tiles = require('../../static/tiles.json');
+          // var tiles = require('../../static/tilesSideOne.json');
           response.render('board', {
-            id: user.id,
+            id: user._id,
             admin: isadmin,
-            prefixes: tiles.sidetwo.prefixes,
-            endingsright: tiles.sidetwo.endingsright,
-            endingsbottom: tiles.sidetwo.endingsbottom,
-            roots: tiles.sidetwo.roots,
-            starstop: tiles.sideone.starstop,
-            starsleft: tiles.sideone.starsleft,
-            starsright: tiles.sideone.starsright,
-            starsbottom: tiles.sideone.starsbottom,
-            dipper: tiles.sideone.dipper,
-            crescent: tiles.sideone.crescent,
-            earth: tiles.sideone.earth});
-        } else {
+            // prefixes: tiles.sidetwo.prefixes,
+            // endingsright: tiles.sidetwo.endingsright,
+            // endingsbottom: tiles.sidetwo.endingsbottom,
+            // roots: tiles.sidetwo.roots,
+            // starstop: tiles.sideone.starstop,
+            // starsleft: tiles.sideone.starsleft,
+            // starsright: tiles.sideone.starsright,
+            // starsbottom: tiles.sideone.starsbottom,
+            // dipper: tiles.sideone.dipper,
+            // crescent: tiles.sideone.crescent,
+            // earth: tiles.sideone.earth
+          });
+        }else {
           response.redirect('admin');
         }
       })

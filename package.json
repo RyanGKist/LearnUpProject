@@ -21,6 +21,7 @@
     "express-session": "^1.15.6",
     "jquery-validation": "^1.17.0",
     "mongoose": "^4.13.12",
+    "package.json": "^2.0.1",
     "path": "^0.12.7",
     "socket.io": "^2.0.4"
   },

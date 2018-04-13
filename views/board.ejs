@@ -106,10 +106,15 @@
                 target.classList.remove('moving');
             })
 
-             $("#reset").click(() => {
-                socket.emit("reset", { room: roomName })
-                setBoard()
+            $("#switch").click(() =>{
+                socket.emit("switch",{room: roomName})
+                switchboard()
             })
+
+            socket.on('switch_boards', function () {
+                switchboard()
+            })
+            
 
             function setBoard() {
                 $.get('http://localhost:8000/tiles').then((tiles) => {
@@ -182,6 +187,21 @@
                 setBoard()
             })
         });
+
+        function switchboard(){
+                var backside = document.getElementById('backside');
+                var frontside = document.getElementById('frontside');
+
+                if (backside.style.display == "none") {
+                    $('#frontside').hide();
+                    $('#backside').show();
+                }
+                else {
+                    $('#backside').hide();
+                    $('#frontside').show();
+                }
+            }
+
     </script>
 </head>
 
@@ -198,43 +218,46 @@
             <% } %>
         </div>
 
-        <h4>Front Side of Board</h4>
-        <div class="frontboard" id="sideone">
-            <div class="section" id="starstop">
-            </div>
-            <div class="section" id="starsleft">
-            </div>
-
-            <div class="section" id="centerone">
-                <div id="crescent">
+        <div id="frontside">
+            <h4>Front Side of Board</h4>
+            <div class="frontboard" id="sideone">
+                <div class="section" id="starstop">
                 </div>
-                <div id="dipper">
+                <div class="section" id="starsleft">
                 </div>
-                <div id="earth">
+            
+                <div class="section" id="centerone">
+                    <div id="crescent">
+                    </div>
+                    <div id="dipper">
+                    </div>
+                    <div id="earth">
+                    </div>
+                </div>
+                <div class="section" id="starsright">
+                </div>
+                <div class="section" id="starsbottom">
                 </div>
             </div>
-            <div class="section" id="starsright">
-            </div>
-            <div class="section" id="starsbottom">
-            </div>
-
         </div>
 
-
-        <br>
-        <h4>Back Side of Board</h4>
-        <div class="backboard" id="sidetwo">
-
-            <div class="section" id="roots">
+        <div id="backside" style="display: none">
+            <h4>Back Side of Board</h4>
+            <div class="backboard" id="sidetwo">
+            
+                <div class="section" id="roots">
+                </div>
+                <div class="section" id="prefixes">
+                </div>
+                <div class="section" id="endingsright">
+                </div>
+                <div class="section" id="endingsbottom">
+                </div>
+            
             </div>
-            <div class="section" id="prefixes">
-            </div>
-            <div class="section" id="endingsright">
-            </div>
-            <div class="section" id="endingsbottom">
-            </div>
-
         </div>
+
+        
     </div>
 </body>
 
