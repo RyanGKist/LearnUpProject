@@ -180,4 +180,10 @@ io.sockets.on('connection', (socket) => {
     socket.broadcast.to(data.room).emit('switch_boards');
   });
 
+  socket.on('terminate', (data) => {
+    socket.broadcast.to(data.room).emit('terminate_by_teacher');
+    io.emit('user disconnected');
+  });
+
+
 });

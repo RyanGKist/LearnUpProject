@@ -128,16 +128,23 @@
                 target.classList.remove('moving');
             })
 
+            $("#switch").click(() =>{
+                socket.emit("switch",{room: roomName})
+                switchboard()
+            })
+
+            
+            
             $("#reset").click(() => {
                 socket.emit("reset", { room: roomName })
                 setBoard()
             })
-            
 
-            $("#switch").click(()=>{
-                socket.emit('switch', {room: roomName})
-                switchboard()
+            socket.on("reset_tiles", function () {
+                setBoard()
             })
+        
+
 
             function setBoard() {
                 $.get('http://localhost:8000/tiles').then((tiles) => {
@@ -201,34 +208,58 @@
 
             setBoard()
 
-            $("#reset").click(() => {
-                socket.emit("reset", { room: roomName })
-                setBoard()
-            })
-
-            socket.on("reset_tiles", function () {
-                setBoard()
-            })
-
             socket.on('switch_boards', function () {
                 switchboard()
             })
 
-        function switchboard(){
+            function switchboard(){
                 var backside = document.getElementById('backside');
                 var frontside = document.getElementById('frontside');
 
-                if (backside.style.display == "none") {
+                if(backside.style.display == "none"){
                     $('#frontside').hide();
                     $('#backside').show();
                 }
-                else {
+                else{
                     $('#backside').hide();
                     $('#frontside').show();
                 }
             }
+            
+            $("#terminate").click(() => {
+        socket.emit("terminate", {
+          room: roomName
         })
-        
+        terminateButtonPressed()
+      })
+
+      function terminateButtonPressed() {
+        $( "#class_over" ).html("Class is over, thank you!");
+      }
+
+      socket.on("terminate_by_teacher", function () {
+        terminateButtonPressed()
+      })
+      
+      socket.on("user disconnected", function(){
+        console.log("user disconnected from client side");
+        $( "#logout_msg" ).html("the other user left the room");
+      })
+
+    $("#terminate").click(() => { socket.emit("terminate", { room: roomName }) 
+        terminateButtonPressed()
+    })
+
+    function terminateButtonPressed() { $( "#class_over" ).html("Class is over, thank you!"); }
+    socket.on("terminate_by_teacher", function () { terminateButtonPressed() })
+    socket.on("user disconnected", function(){ console.log("user disconnected from client side"); $( "#logout_msg" ).html("the other user left the room"); })
+
+
+
+        });
+
+
+
     </script>
 </head>
 
@@ -236,6 +267,7 @@
     <div class="container">
         <div id="title">
             <h2 id="Welcome" name='<%=id %>' admin='<%=admin %>'>Learning Board</h2>
+            <div id="logout_msg"></div>
             <% if (admin) {%>
                 <div class="text-right align-top ib">
                     <button class="btn btn-success ib" id="switch">Switch Sides</button>
@@ -243,8 +275,15 @@
                         <button class="btn btn-primary ib">Back to Dashboard</button>
                     </a>
                     <button class="btn btn-warning ib" id="reset">Reset Board</button>
+                    <a href="http://localhost:8000/admin/dashboard">
+                        <button class="btn btn-danger ib" id="terminate">Terminate</button>
+                    </a>
                 </div>
                 <% } %>
+                <% if (!admin) {%>
+                    <div id="class_over">
+                    </div>
+                    <% } %>
                     <div id="light">
                         <div id="teacher_light"></div>
                         <h5>Teahcer</h5>
@@ -280,19 +319,24 @@
             <h4>Back Side of Board</h4>
             <div class="backboard" id="sidetwo">
             
-                <div class="section" id="roots">
+                <div class="section" id="centerone">
+                    <div id="crescent">
+                    </div>
+                    <div id="dipper">
+                    </div>
+                    <div id="earth">
+                    </div>
                 </div>
-                <div class="section" id="prefixes">
+                <div class="section" id="starsright">
                 </div>
-                <div class="section" id="endingsright">
-                </div>
-                <div class="section" id="endingsbottom">
+                <div class="section" id="starsbottom">
                 </div>
             </div>
         </div>
 
-        
-    </div>
+        <div id></div>
+
+
 </body>
 
 
