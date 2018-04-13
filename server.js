@@ -130,7 +130,7 @@ io.sockets.on('connection', (socket) => {
   });
 
   socket.on('join room', (room) => {
-    console.log('joined room');
+    console.log('joined room', room);
     socket.join(room);
     io.to(room).emit('user_joined', { response: `user joined room ${room}` });
   });
@@ -154,4 +154,17 @@ io.sockets.on('connection', (socket) => {
   socket.on('reset', (data) => {
     socket.broadcast.to(data.room).emit('reset_tiles');
   });
+
+  socket.on('terminate', (data) => {
+    socket.broadcast.to(data.room).emit('terminate_by_teacher');
+    io.emit('user disconnected');
+  });
+
+  // socket.on('disconnect', function () {
+  //   console.log("disconnect at server side");
+  //   io.emit('user disconnected');
+  // });
+
 });
+
+

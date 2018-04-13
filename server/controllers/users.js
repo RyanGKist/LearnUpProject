@@ -17,6 +17,7 @@ const bcrypt = require('bcrypt');
 //  Retrieve a defined schema from mongoose models:
 // 'User' variable object comforms to a model_instance retrieved from mongoose models.
 const User = mongoose.model('User');
+const nodemailer = require('nodemailer');
 
 module.exports = {
   // EXAMPLE OF A CRUD get REQUEST method:
@@ -66,7 +67,44 @@ module.exports = {
               admin,
               hash: newHash,
             }).then((newUser) => {
+              var newUserEmail=request.body.newuseremail;
+              var transporter = nodemailer.createTransport({
+                service: 'gmail',
+                auth: {
+                    user: 'learnup2017@gmail.com',
+                    pass: 'Dojo2017'
+                }
+            });
+
+            var content = `
+            <h2>You have a new account created by the admin of LearnUP team.</h2>
+            <h2>Your temporary password is : (Daniel is working on the temporary password)</h2>
+            <h2>Please go to (deploy website) to login and change your password.</h2>
+            <h3>LearnUP</h3>`
+
+            var mailList = [
+              newUserEmail,
+              "learnup2017@gmail.com"
+            ]
+
+            var mailOptions = {
+              from: 'omar.ihmoda@gmail.com',
+              to: mailList,
+              subject: 'New account from LearnUP',
+              html: content
+            };
+
+            transporter.sendMail(mailOptions, function (error, info) {
+              if (error) {
+                  console.log(error);
+              } else {
+                  console.log('Email sent: ' + info.response);
+              }
+            });
+
+        
               request.flash('exists', `Successfully added ${newUser.email}.`);
+              console.log("hi", newUserEmail);
               response.redirect('admin/dashboard');
             });
           });
