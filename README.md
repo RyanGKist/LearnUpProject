@@ -16,11 +16,11 @@
   
 ## 3. Board switch
 ### Client - board.ejs: 
-  *Add div to include all back and front side
-  *create function switchboard()
-  *then emit the button switch click
-  *socket on for switch_boards
-###Server:
+  * Add div to include all back and front side
+  * create function switchboard()
+  * then emit the button switch click
+  * socket on for switch_boards
+### Server:
   socket on for switch
   
 ## 4. Board reset feature for instructor that resets student view as well
