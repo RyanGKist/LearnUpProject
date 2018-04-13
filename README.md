@@ -31,6 +31,6 @@
 ### Server:
   fix function in login in users.js
 
-## Pending
+## [Pending]
 ### 1. Logged in light for student on reading board / Logged in light for the admin on reading board
 * Not working if teacher left the room first due to its based on users within the room length, not getting user id
