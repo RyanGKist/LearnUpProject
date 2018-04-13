@@ -111,6 +111,7 @@ const server = app.listen(8000, () => {
 // ==============================================
 // Require 'socket.io' Module & tell it to listen to 'server':
 const io = require('socket.io').listen(server);
+
 // Returns an "io" object to control sockets!
 
 // SETUP a 'connection' EVENT to listen to any client that connects to our server socket:
@@ -127,16 +128,33 @@ io.sockets.on('connection', (socket) => {
   });
 
   socket.on('create', (room) => {
-    console.log('joined room'+room);
+    console.log('created room');
     socket.join(room);
-    io.to(room).emit('user_joined', { response: `user joined room ${room}` });
+    io.to(room).emit('user_joined', { response: `user created room ${room}` });
   });
 
   socket.on('join room', (room) => {
-    console.log('joined room' + room);
+    console.log('joined room', room);
     socket.join(room);
-    io.to(room).emit('user_joined', { response: `user joined room ${room}` });
+    console.log(socket.adapter.rooms[room])
+
+    var destination = '/';
+
+    if ( socket.adapter.rooms[room].length<=2 ){
+      io.to(room).emit('user_joined', { response: `user joined room ${room}`, users: socket.adapter.rooms[room].length});
+    }
+    else if(socket.adapter.rooms[room].length>2){
+      socket.emit('full', destination);
+    }
   });
+
+  socket.on('leave room', (room) =>{
+    console.log('In leave room',room);
+    socket.leave('room', function (err) {
+      console.log(err); // display null
+      console.log(socket.adapter.rooms[room])
+    });
+  })
 
   socket.on('tile_clicked', (data) => {
     socket.broadcast.to(data.room).emit('server_response', { response: data });

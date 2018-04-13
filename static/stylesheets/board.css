@@ -177,3 +177,28 @@ p {
 #sidetwo {
   /* visibility: hidden; */
 }
+
+#light{
+  display: inline-block;
+
+}
+
+#teacher_light, #student_light{
+  margin-left: 2rem;
+  height: 25px;
+  width: 25px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+h5{
+  display: inline-block;
+}
+
+.online{
+  background-color: #2cad48;
+}
+
+.offline{
+  background-color: #bbb;
+}
