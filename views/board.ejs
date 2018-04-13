@@ -29,14 +29,30 @@
         $(document).ready(function () {
             var roomName = document.getElementById('Welcome').getAttribute("name")
             var socket = io.connect();
+            var admin = document.getElementById('Welcome').getAttribute("admin")
 
             function joinRoom() {
-                socket.emit("join room", roomName)
+                socket.emit("join room", roomName);
             }
+
+            socket.on('full', function (destination) {
+                window.location.href = destination;
+            })
 
             socket.on('user_joined', function (data) {
                 //Display 'data' received on the 'client' browser console:
                 console.log('The server says: ' + data.response);
+                console.log('ids', data.ids);
+                console.log('admin',admin);
+
+                if (data.users == 2) {
+                    $("#student_light").addClass('online');
+                }
+
+                if (admin) {
+                    $("#teacher_light").addClass('online');
+                }
+
             });
 
             joinRoom()
@@ -45,6 +61,12 @@
                 .draggable({
                     inertia: true,
 
+                    restrict: {
+                        restriction: "parent",
+                        endOnly: true,
+                        elementRect: { top: 0, left: 0, bottom: 1, right: 1 }
+                    },
+
                     onmove: dragMoveListener,
                     onend: function (event) {
                         // set target so we can measure the coordinates of it's final x/y coordinates    
@@ -52,7 +74,7 @@
 
                         //get the id of the target 
                         id = event.currentTarget.id
-                        
+
                         // keep the dragged position in the data-x/data-y attributes 
                         x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx,
                             y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
@@ -106,15 +128,16 @@
                 target.classList.remove('moving');
             })
 
-            $("#switch").click(() =>{
-                socket.emit("switch",{room: roomName})
-                switchboard()
-            })
-
-            socket.on('switch_boards', function () {
-                switchboard()
+            $("#reset").click(() => {
+                socket.emit("reset", { room: roomName })
+                setBoard()
             })
             
+
+            $("#switch").click(()=>{
+                socket.emit('switch', {room: roomName})
+                switchboard()
+            })
 
             function setBoard() {
                 $.get('http://localhost:8000/tiles').then((tiles) => {
@@ -186,7 +209,10 @@
             socket.on("reset_tiles", function () {
                 setBoard()
             })
-        });
+
+            socket.on('switch_boards', function () {
+                switchboard()
+            })
 
         function switchboard(){
                 var backside = document.getElementById('backside');
@@ -201,21 +227,30 @@
                     $('#frontside').show();
                 }
             }
-
+        })
+        
     </script>
 </head>
 
 <body>
     <div class="container">
         <div id="title">
-            <h2 id="Welcome" name='<%=id %>'>Learning Board</h2>
+            <h2 id="Welcome" name='<%=id %>' admin='<%=admin %>'>Learning Board</h2>
             <% if (admin) {%>
-            <div class="text-right align-top ib">
-                <button class="btn btn-success ib" id="switch">Switch Sides</button>
-                <a href="/admin/dashboard"><button class="btn btn-primary ib">Back to Dashboard</button></a>
-                <button class="btn btn-warning ib" id="reset">Reset Board</button>
-            </div>
-            <% } %>
+                <div class="text-right align-top ib">
+                    <button class="btn btn-success ib" id="switch">Switch Sides</button>
+                    <a href="/admin/dashboard">
+                        <button class="btn btn-primary ib">Back to Dashboard</button>
+                    </a>
+                    <button class="btn btn-warning ib" id="reset">Reset Board</button>
+                </div>
+                <% } %>
+                    <div id="light">
+                        <div id="teacher_light"></div>
+                        <h5>Teahcer</h5>
+                        <div id="student_light"></div>
+                        <h5>Student</h5>
+                    </div>
         </div>
 
         <div id="frontside">
@@ -253,7 +288,6 @@
                 </div>
                 <div class="section" id="endingsbottom">
                 </div>
-            
             </div>
         </div>
 
