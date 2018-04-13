@@ -4,7 +4,7 @@
   * In socket join room, based on the length within the room to distinguish the light to on or off
   * also add socket.leave room
   * also add if users > 2 then redirect to index
-  * Need to fix: not working if teacher left the room first due to its based on users within the room length, not getting user id
+  
 ### Client - board.ejs:
   Add var admin, in socket user_joined, addClass if users is equal to 2   
 ### CSS:
@@ -30,3 +30,7 @@
 ## 5. Fixing Admin login w/o pw problems
 ### Server:
   fix function in login in users.js
+
+## Pending
+### 1. Logged in light for student on reading board / Logged in light for the admin on reading board
+* Not working if teacher left the room first due to its based on users within the room length, not getting user id
