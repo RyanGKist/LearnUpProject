@@ -1,5 +1,5 @@
 # LearnUpProject
-## Logged in light for student on reading board / Logged in light for the admin on reading board
+## 1. Logged in light for student on reading board / Logged in light for the admin on reading board
 ### Server:
   * In socket join room, based on the length within the room to distinguish the light to on or off
   * also add socket.leave room
@@ -10,11 +10,11 @@
 ### CSS:
   css for the light
   
-## Prevent tiles from being dragged off into space
+## 2. Prevent tiles from being dragged off into space
 ### Client - board.ejs:
   Add restrict in interact('.draggable')
   
-## Board switch
+## 3. Board switch
 ### Client - board.ejs: 
   *Add div to include all back and front side
   *create function switchboard()
@@ -23,10 +23,10 @@
 ###Server:
   socket on for switch
   
-## Board reset feature for instructor that resets student view as well
+## 4. Board reset feature for instructor that resets student view as well
 ### Client - board.ejs:
   fix the reset function
 
-## Fixing Admin login w/o pw problems
+## 5. Fixing Admin login w/o pw problems
 ### Server:
   fix function in login in users.js
