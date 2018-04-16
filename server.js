@@ -148,6 +148,12 @@ io.sockets.on('connection', (socket) => {
     }
   });
 
+  // indicates if user has tab hidden or minimized
+  socket.on('paying_attention_status', (room, attentionStatus) => {
+    console.log(room);
+    io.to(room).emit('attention_status', {response: `user ${socket.id} is paying attention: ${attentionStatus}`});
+  });
+
   socket.on('leave room', (room) =>{
     console.log('In leave room',room);
     socket.leave('room', function (err) {
