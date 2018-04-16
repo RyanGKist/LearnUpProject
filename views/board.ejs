@@ -31,6 +31,7 @@
             var socket = io.connect();
             var admin = document.getElementById('Welcome').getAttribute("admin")
 
+            // user joins room
             function joinRoom() {
                 socket.emit("join room", roomName);
             }
@@ -42,8 +43,8 @@
             socket.on('user_joined', function (data) {
                 //Display 'data' received on the 'client' browser console:
                 console.log('The server says: ' + data.response);
-                console.log('ids', data.ids);
-                console.log('admin',admin);
+                // console.log('ids', data.ids);
+                // console.log('admin',admin);
 
                 if (data.users == 2) {
                     $("#student_light").addClass('online');
@@ -56,6 +57,31 @@
             });
 
             joinRoom()
+
+            // indicates if user has tab hidden or minimized
+            var attentionStatus;
+
+            document.addEventListener("visibilitychange", function() {
+                // console.log( document.hidden );
+                if (document.hidden == false) { // if document is not hidden
+                    attentionStatus = true; // student is paying attention
+                } else {
+                    attentionStatus = false; // not paying attention
+                }
+                socket.emit('paying_attention_status', roomName, attentionStatus);
+            });
+
+            socket.on('attention_status', function(data) {
+                $("#student_light").toggleClass('online'); //toggle off green light
+                
+                if ($("#student_light").hasClass('not_paying_attention')) {   //if class is present
+                    $("#student_light").toggleClass('not_paying_attention');  //toggle off yellow to toggle on green
+                } else {
+                    $("#student_light").addClass('not_paying_attention'); // add class for yellow light
+                }
+                
+                console.log('the server says: ' + data.response);
+            });
 
             interact('.draggable')
                 .draggable({
@@ -242,7 +268,7 @@
       })
       
       socket.on("user disconnected", function(){
-        console.log("user disconnected from client side");
+        // console.log("user disconnected from client side");
         $( "#logout_msg" ).html("the other user left the room");
       })
 
@@ -250,11 +276,16 @@
         terminateButtonPressed()
     })
 
-    function terminateButtonPressed() { $( "#class_over" ).html("Class is over, thank you!"); }
-    socket.on("terminate_by_teacher", function () { terminateButtonPressed() })
-    socket.on("user disconnected", function(){ console.log("user disconnected from client side"); $( "#logout_msg" ).html("the other user left the room"); })
-
-
+    function terminateButtonPressed() {
+        $( "#class_over" ).html("Class is over, thank you!"); 
+    }
+    socket.on("terminate_by_teacher", function () {
+        terminateButtonPressed() 
+    })
+    socket.on("user disconnected", function(){ 
+        console.log("user disconnected from client side"); 
+        $( "#logout_msg" ).html("the other user left the room"); 
+    })
 
         });
 
@@ -268,6 +299,7 @@
         <div id="title">
             <h2 id="Welcome" name='<%=id %>' admin='<%=admin %>'>Learning Board</h2>
             <div id="logout_msg"></div>
+
             <% if (admin) {%>
                 <div class="text-right align-top ib">
                     <button class="btn btn-success ib" id="switch">Switch Sides</button>
@@ -279,17 +311,28 @@
                         <button class="btn btn-danger ib" id="terminate">Terminate</button>
                     </a>
                 </div>
-                <% } %>
-                <% if (!admin) {%>
-                    <div id="class_over">
-                    </div>
-                    <% } %>
-                    <div id="light">
-                        <div id="teacher_light"></div>
-                        <h5>Teahcer</h5>
+
+                <div id="light">
                         <div id="student_light"></div>
-                        <h5>Student</h5>
-                    </div>
+                    <h5>Student</h5>
+                </div>
+            <% } %>
+
+            <% if (!admin) {%>
+                <div id="class_over"></div>
+                <div id="light">
+                    <div id="teacher_light"></div>
+                    <h5>Teacher</h5>
+                </div>
+            <% } %>
+
+            <!-- <div id="light">
+                <div id="teacher_light"></div>
+                <h5>Teacher</h5>
+                    <div id="student_light"></div>
+                <h5>Student</h5>
+            </div> -->
+
         </div>
 
         <div id="frontside">
