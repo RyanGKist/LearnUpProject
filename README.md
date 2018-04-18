@@ -1,33 +1,33 @@
 # LearnUpProject 4/18/18 updated
-##Changes for forget pw
+## Changes for forget pw
 
-###package.json:
+### package.json:
 - jsonwebtoken           
   // Please remember to nom install this! 
 
-###views
+### views
 - Add forgetpw.ejs
 - Add Purest.ejs
 - In admin.ejs, add Line 37 - 39, forget password related
 
-###static/ stylesheets / style.css
+### static/ stylesheets / style.css
 - Add Line 62 - 64, style of class forgetpw
 
-###models
+### models
 - Add Line 22, resettoken
 // Not sure if it really adds in or not
 
-###controllers
+### controllers
 - Add Line 21, 22, define jwt and secret 
 - Add Line 239 - 326, function forgetpassword, getUserinforgetpw, resetpassword
 
-###routes
+### routes
 - Add Line 20 - 22, app.get'/forgetpw’
 - Add Line 75 - 77, app.post'/forgetpassword'
 - Add Line 79 - 81, app.get ‘/reset/:token'
 - Add Line 83-85, app.post'/resetpw'
 
-##4/13/18
+## 4/13/18
 ## 1. Logged in light for student on reading board / Logged in light for the admin on reading board
 ### Server:
   * In socket join room, based on the length within the room to distinguish the light to on or off
