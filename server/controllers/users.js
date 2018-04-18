@@ -18,26 +18,28 @@ const bcrypt = require('bcrypt');
 // 'User' variable object comforms to a model_instance retrieved from mongoose models.
 const User = mongoose.model('User');
 const nodemailer = require('nodemailer');
+const jwt = require('jsonwebtoken');
+const secret = 'learnup'; 
 
 module.exports = {
   // EXAMPLE OF A CRUD get REQUEST method:
   // https://www.npmjs.com/package/bcrypt#with-promises
-  login (request, response) {
+  login(request, response) {
     User.findOne({ email: request.body.email })
       .then((result) => {
         console.log("This is result in login", result);
         bcrypt.compare(request.body.password, result.hash)
-        .then((res)=>{
-          if(res){
-            console.log("went to then in login",res)
-            request.session.user = request.body.email;
-            response.redirect('/admin/dashboard');
-          }
-          else {
-            console.log('Error received on bcrypt compare, ');
-            request.flash('error', 'Incorrect password ');
-            response.redirect('/admin');
-          }
+          .then((res) => {
+            if (res) {
+              console.log("went to then in login", res)
+              request.session.user = request.body.email;
+              response.redirect('/admin/dashboard');
+            }
+            else {
+              console.log('Error received on bcrypt compare, ');
+              request.flash('error', 'Incorrect password ');
+              response.redirect('/admin');
+            }
           });
       })
       .catch((error) => {
@@ -71,42 +73,42 @@ module.exports = {
               admin,
               hash: newHash,
             }).then((newUser) => {
-              var newUserEmail=request.body.newuseremail;
+              var newUserEmail = request.body.newuseremail;
               var transporter = nodemailer.createTransport({
                 service: 'gmail',
                 auth: {
-                    user: 'learnup2017@gmail.com',
-                    pass: 'Dojo2017'
+                  user: 'learnup2017@gmail.com',
+                  pass: 'Dojo2017'
                 }
-            });
+              });
 
-            var content = `
+              var content = `
             <h2>You have a new account created by the admin of LearnUP team.</h2>
             <h2>Your temporary password is : (Daniel is working on the temporary password)</h2>
             <h2>Please go to (deploy website) to login and change your password.</h2>
             <h3>LearnUP</h3>`
 
-            var mailList = [
-              newUserEmail,
-              "learnup2017@gmail.com"
-            ]
+              var mailList = [
+                newUserEmail,
+                "learnup2017@gmail.com"
+              ]
 
-            var mailOptions = {
-              from: 'omar.ihmoda@gmail.com',
-              to: mailList,
-              subject: 'New account from LearnUP',
-              html: content
-            };
+              var mailOptions = {
+                from: 'omar.ihmoda@gmail.com',
+                to: mailList,
+                subject: 'New account from LearnUP',
+                html: content
+              };
 
-            transporter.sendMail(mailOptions, function (error, info) {
-              if (error) {
+              transporter.sendMail(mailOptions, function (error, info) {
+                if (error) {
                   console.log(error);
-              } else {
+                } else {
                   console.log('Email sent: ' + info.response);
-              }
-            });
+                }
+              });
 
-        
+
               request.flash('exists', `Successfully added ${newUser.email}.`);
               console.log("hi", newUserEmail);
               response.redirect('admin/dashboard');
@@ -224,7 +226,7 @@ module.exports = {
             // crescent: tiles.sideone.crescent,
             // earth: tiles.sideone.earth
           });
-        }else {
+        } else {
           response.redirect('admin');
         }
       })
@@ -233,4 +235,98 @@ module.exports = {
         response.redirect('/admin');
       });
   }, // <--- ADD ADDITIONAL METHODS SEPARATED BY A COMMA ','
+
+  forgetpassword(request, response) {
+    User.findOne({ email: request.body.email }, function (err, user) {
+      if (err) {
+        request.flash(err);
+        response.redirect('/forgetpw');
+      } else {
+        if (!user) {
+          request.flash('error', 'E-mail was not found.');
+          response.redirect('/forgetpw');
+        } else {
+          user.resettoken = jwt.sign({ email: user.email }, secret, { expiresIn: '24h' });
+          var transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+              user: 'learnup2017@gmail.com',
+              pass: 'Dojo2017'
+            }
+          });
+
+          var content = `
+            Hello,<br><br> You recently request a password rest link. Please click on the link below to reset your password: <br><br>
+            <a href="http://localhost:8000/reset/${user.resettoken}">http://localhost:8000/reset/${user.resettoken}</a>
+            `
+
+          var mailList = [
+            user.email,
+            "learnup2017@gmail.com"
+          ]
+
+          var mailOptions = {
+            from: 'omar.ihmoda@gmail.com',
+            to: mailList,
+            subject: 'Rest Password Link Request',
+            html: content
+          };
+
+          transporter.sendMail(mailOptions, function (error, info) {
+            if (error) {
+              console.log(error);
+            } else {
+              console.log('Email sent: ' + info.response);
+            }
+          });
+
+          request.flash('error', 'Password reset Link has been send to email.');
+          response.redirect('/forgetpw');
+        }
+      }
+    })
+  },
+
+  getUserinforgetpw(request, response){
+    User.findOne({resettoken: request.params.token}, function(err, user){
+      if(err){
+        console.log(err)
+      } else {
+        console.log('user',user)
+        var token = request.params.token;
+        console.log('token', token)
+        jwt.verify(token, secret, function(err, decoded){
+          console.log('decoded', decoded)
+          if(err){
+            response.render('pwreset', {success: false, message: 'password link has expired/ You have no premission to enter this page'})
+          } else {
+            console.log(decoded.email); 
+            response.render('pwreset', {success: true, user: decoded.email, message: request.flash('error')});
+          }
+        })
+      }
+    })
+  },
+
+  resetpassword(request, response){
+    User.findOne({ email: request.body.edituseremail })
+    .then((updateUser) => {
+      if (updateUser) {
+        bcrypt.hash(request.body.edituserpassword, 10).then((newHash) => {
+          updateUser.hash = newHash;
+          updateUser.save().then((user) => {
+            request.flash('exists', `Successfully edited account details for ${user.email}.`);
+            response.redirect('admin/dashboard');
+          });
+        });
+      } else {
+        request.flash('exists', `Could not find user ${request.body.edituseremail}.`);
+        response.redirect('admin/dashboard');
+      }
+    });
+    
+
+  }
+
+
 };
