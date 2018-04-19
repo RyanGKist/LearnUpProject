@@ -17,6 +17,10 @@ module.exports = function (app) {
     response.render('index');
   });
 
+  app.get ('/forgetpw',(request, response) =>{
+    response.render('forgetpw', { message: request.flash('error') });
+  })
+
   app.get('/admin/dashboard', (request, response) => {
     if (request.session.user) {
       users.dashboard(request, response);
@@ -67,4 +71,16 @@ module.exports = function (app) {
   app.post('/delete/:id', (request, response) => {
     users.delete(request, response);
   });
+
+  app.post('/forgetpassword', (request, response) => {
+    users.forgetpassword(request, response)
+  });
+
+  app.get('/reset/:token', (request, response) => {
+    users.getUserinforgetpw(request, response)
+  });
+
+  app.post('/resetpw',(request, response) => {
+    users.resetpassword(request, response)
+  })
 };

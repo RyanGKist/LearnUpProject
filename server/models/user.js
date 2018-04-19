@@ -19,6 +19,7 @@ const UserSchema = new mongoose.Schema(
     email: { type: String, required: true },
     hash: { type: String, required: true },
     admin: { type: Number, required: true },
+    resettoken: { type: String, required: false },
   },
   { timestamps: true },
 );
