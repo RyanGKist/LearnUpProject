@@ -162,6 +162,10 @@ io.sockets.on('connection', (socket) => {
     });
   })
 
+  socket.on('tile_duplicated', (data) => {
+    socket.broadcast.to(data.room).emit('tileduplicate', { response: data });
+  });
+
   socket.on('tile_clicked', (data) => {
     socket.broadcast.to(data.room).emit('server_response', { response: data });
   });
