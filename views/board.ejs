@@ -88,7 +88,7 @@
                     inertia: true,
 
                     restrict: {
-                        restriction: "parent",
+                        restriction: ".bothboards",
                         endOnly: true,
                         elementRect: { top: 0, left: 0, bottom: 1, right: 1 }
                     },
@@ -430,38 +430,42 @@
             </div> -->
 
         </div>
-
+		
         <div id="frontside">
-            <h4>Front Side of Board</h4>
-            <div class="frontboard" id="sideone">
-                <div class="section" id="starstop">
-                </div>
-                <div class="section" id="starsleft">
-                </div>
-            
-                <div class="section" id="centerone">
-                    <div id="crescent">
-                    </div>
-                    <div id="dipper">
-                    </div>
-                    <div id="earth">
-                    </div>
-                </div>
-                <div class="section" id="starsright">
-                </div>
-                <div class="section" id="starsbottom">
-                </div>
-            </div>
+			<h4>Front Side of Board</h4>
+			<div class="bothboards">
+				<div class="frontboard" id="sideone">
+					<div class="section" id="starstop">
+					</div>
+					<div class="section" id="starsleft">
+					</div>
+				
+					<div class="section" id="centerone">
+						<div id="crescent">
+						</div>
+						<div id="dipper">
+						</div>
+						<div id="earth">
+						</div>
+					</div>
+					<div class="section" id="starsright">
+					</div>
+					<div class="section" id="starsbottom">
+					</div>
+				</div>
+			</div>
         </div>
 
         <div id="backside" style="display: none">
-            <h4>Back Side of Board</h4>
-            <div class="backboard" id="sidetwo">
-                <div class="section" id="roots"></div>
-                <div class="section" id="prefixes"></div>
-                <div class="section" id="endingsright"></div>
-                <div class="section" id="endingsbottom"></div>
-            </div>
+			<h4>Back Side of Board</h4>
+			<div class="bothboards">
+				<div class="backboard" id="sidetwo">
+					<div class="section" id="roots"></div>
+					<div class="section" id="prefixes"></div>
+					<div class="section" id="endingsright"></div>
+					<div class="section" id="endingsbottom"></div>
+				</div>
+			</div>
         </div>
     </div>
 
