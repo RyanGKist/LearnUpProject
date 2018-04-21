@@ -17,6 +17,10 @@
     <title>Dashboard</title>
     <script type="text/javascript" src="/socket.io/socket.io.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.17.0/dist/jquery.validate.min.js"></script>
+
+    <!-- Generating random REGEX expression when press generate room -->
+    <script src="https://github.com/fent/randexp.js/releases/download/v0.4.3/randexp.min.js"></script>
+
     
     <script>
     $(document).ready(function () {
@@ -63,6 +67,9 @@
 
                 }
             });
+
+            // generateRandomPassword
+            
         });
     </script>
 
@@ -127,9 +134,10 @@
                         <div class="row">
                             <div class="col-md-8">
                                 <div class="form-group">
-                                    <input type="text" class="form-control" id="meetingurl" placeholder="">
+                                    <input readonly type="text" class="form-control" id="meetingurl" placeholder="">
                                 </div>
                             </div>
+                            
                             <form id="enterRoom" class="col-md-4" method="get">
                                 <div class="form-group">
                                     <button type="submit" name="" id="enterRoomButton" class="btn btn-primary disabled">Enter Room</button>
@@ -236,7 +244,7 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="password">Password</label>
-                                    <input type="password" class="form-control" name="edituserpassword" placeholder="Enter new password">
+                                    <input type="password" class="form-control" name="edituserpassword" placeholder="Enter new password" id="password">
                                     <label id="edituserpassword-error" class="error" for="password"></label>
                                 </div>
                                 <div class="form-group">
@@ -269,7 +277,14 @@
     }
 
     function createRoom() {
+        // var roomID = new RandExp(/^[0-9,A-Z]{6}$/).gen()
         var room = document.getElementById('genRoomButton').getAttribute('name')
+        // document.getElementById("genRoomButton").setAttribute
+        // getAttribute('name')
+        
+        // gennerate a random 6 character regex for room
+        // var roomExtend = new RandExp(/^[0-9,A-Z]{6}$/).gen()
+        
         document.getElementById('enterRoomButton').classList.remove("disabled")
         document.getElementById('enterRoom').setAttribute("action", "/room/" + room)
         document.getElementById("meetingurl").setAttribute("value", "http://localhost:8000/room/" + room)

@@ -29,21 +29,69 @@
         $(document).ready(function () {
             var roomName = document.getElementById('Welcome').getAttribute("name")
             var socket = io.connect();
+            var admin = document.getElementById('Welcome').getAttribute("admin")
 
+            // user joins room
             function joinRoom() {
-                socket.emit("join room", roomName)
+                socket.emit("join room", roomName);
             }
+
+            socket.on('full', function (destination) {
+                window.location.href = destination;
+            })
 
             socket.on('user_joined', function (data) {
                 //Display 'data' received on the 'client' browser console:
                 console.log('The server says: ' + data.response);
+                // console.log('ids', data.ids);
+                // console.log('admin',admin);
+
+                if (data.users == 2) {
+                    $("#student_light").addClass('online');
+                }
+
+                if (admin) {
+                    $("#teacher_light").addClass('online');
+                }
+
             });
 
             joinRoom()
 
+            // indicates if user has tab hidden or minimized
+            var attentionStatus;
+
+            document.addEventListener("visibilitychange", function() {
+                // console.log( document.hidden );
+                if (document.hidden == false) { // if document is not hidden
+                    attentionStatus = true; // student is paying attention
+                } else {
+                    attentionStatus = false; // not paying attention
+                }
+                socket.emit('paying_attention_status', roomName, attentionStatus);
+            });
+
+            socket.on('attention_status', function(data) {
+                $("#student_light").toggleClass('online'); //toggle off green light
+                
+                if ($("#student_light").hasClass('not_paying_attention')) {   //if class is present
+                    $("#student_light").toggleClass('not_paying_attention');  //toggle off yellow to toggle on green
+                } else {
+                    $("#student_light").addClass('not_paying_attention'); // add class for yellow light
+                }
+                
+                console.log('the server says: ' + data.response);
+            });
+
             interact('.draggable')
                 .draggable({
                     inertia: true,
+
+                    restrict: {
+                        restriction: "parent",
+                        endOnly: true,
+                        elementRect: { top: 0, left: 0, bottom: 1, right: 1 }
+                    },
 
                     onmove: dragMoveListener,
                     onend: function (event) {
@@ -52,7 +100,7 @@
 
                         //get the id of the target 
                         id = event.currentTarget.id
-                        
+
                         // keep the dragged position in the data-x/data-y attributes 
                         x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx,
                             y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
@@ -106,10 +154,23 @@
                 target.classList.remove('moving');
             })
 
-             $("#reset").click(() => {
+            $("#switch").click(() =>{
+                socket.emit("switch",{room: roomName})
+                switchboard()
+            })
+
+            
+            
+            $("#reset").click(() => {
                 socket.emit("reset", { room: roomName })
                 setBoard()
             })
+
+            socket.on("reset_tiles", function () {
+                setBoard()
+            })
+        
+
 
             function setBoard() {
                 $.get('http://localhost:8000/tiles').then((tiles) => {
@@ -173,69 +234,141 @@
 
             setBoard()
 
-            $("#reset").click(() => {
-                socket.emit("reset", { room: roomName })
-                setBoard()
+            socket.on('switch_boards', function () {
+                switchboard()
             })
 
-            socket.on("reset_tiles", function () {
-                setBoard()
-            })
+            function switchboard(){
+                var backside = document.getElementById('backside');
+                var frontside = document.getElementById('frontside');
+
+                if(backside.style.display == "none"){
+                    $('#frontside').hide();
+                    $('#backside').show();
+                }
+                else{
+                    $('#backside').hide();
+                    $('#frontside').show();
+                }
+            }
+            
+            $("#terminate").click(() => {
+        socket.emit("terminate", {
+          room: roomName
+        })
+        terminateButtonPressed()
+      })
+
+      function terminateButtonPressed() {
+        $( "#class_over" ).html("Class is over, thank you!");
+      }
+
+      socket.on("terminate_by_teacher", function () {
+        terminateButtonPressed()
+      })
+      
+      socket.on("user disconnected", function(){
+        // console.log("user disconnected from client side");
+        $( "#logout_msg" ).html("the other user left the room");
+      })
+
+    $("#terminate").click(() => { socket.emit("terminate", { room: roomName }) 
+        terminateButtonPressed()
+    })
+
+    function terminateButtonPressed() {
+        $( "#class_over" ).html("Class is over, thank you!"); 
+    }
+    socket.on("terminate_by_teacher", function () {
+        terminateButtonPressed() 
+    })
+    socket.on("user disconnected", function(){ 
+        console.log("user disconnected from client side"); 
+        $( "#logout_msg" ).html("the other user left the room"); 
+    })
+
         });
+
+
+
     </script>
 </head>
 
 <body>
     <div class="container">
         <div id="title">
-            <h2 id="Welcome" name='<%=id %>'>Learning Board</h2>
+            <h2 id="Welcome" name='<%=id %>' admin='<%=admin %>'>Learning Board</h2>
+            <div id="logout_msg"></div>
+
             <% if (admin) {%>
-            <div class="text-right align-top ib">
-                <button class="btn btn-success ib" id="switch">Switch Sides</button>
-                <a href="/admin/dashboard"><button class="btn btn-primary ib">Back to Dashboard</button></a>
-                <button class="btn btn-warning ib" id="reset">Reset Board</button>
-            </div>
+                <div class="text-right align-top ib">
+                    <button class="btn btn-success ib" id="switch">Switch Sides</button>
+                    <a href="/admin/dashboard">
+                        <button class="btn btn-primary ib">Back to Dashboard</button>
+                    </a>
+                    <button class="btn btn-warning ib" id="reset">Reset Board</button>
+                    <a href="http://localhost:8000/admin/dashboard">
+                        <button class="btn btn-danger ib" id="terminate">Terminate</button>
+                    </a>
+                </div>
+
+                <div id="light">
+                        <div id="student_light"></div>
+                    <h5>Student</h5>
+                </div>
             <% } %>
-        </div>
 
-        <h4>Front Side of Board</h4>
-        <div class="frontboard" id="sideone">
-            <div class="section" id="starstop">
-            </div>
-            <div class="section" id="starsleft">
-            </div>
+            <% if (!admin) {%>
+                <div id="class_over"></div>
+                <div id="light">
+                    <div id="teacher_light"></div>
+                    <h5>Teacher</h5>
+                </div>
+            <% } %>
 
-            <div class="section" id="centerone">
-                <div id="crescent">
-                </div>
-                <div id="dipper">
-                </div>
-                <div id="earth">
-                </div>
-            </div>
-            <div class="section" id="starsright">
-            </div>
-            <div class="section" id="starsbottom">
-            </div>
+            <!-- <div id="light">
+                <div id="teacher_light"></div>
+                <h5>Teacher</h5>
+                    <div id="student_light"></div>
+                <h5>Student</h5>
+            </div> -->
 
         </div>
 
+        <div id="frontside">
+            <h4>Front Side of Board</h4>
+            <div class="frontboard" id="sideone">
+                <div class="section" id="starstop">
+                </div>
+                <div class="section" id="starsleft">
+                </div>
+            
+                <div class="section" id="centerone">
+                    <div id="crescent">
+                    </div>
+                    <div id="dipper">
+                    </div>
+                    <div id="earth">
+                    </div>
+                </div>
+                <div class="section" id="starsright">
+                </div>
+                <div class="section" id="starsbottom">
+                </div>
+            </div>
+        </div>
 
-        <br>
-        <h4>Back Side of Board</h4>
-        <div class="backboard" id="sidetwo">
-
-            <div class="section" id="roots">
+        <div id="backside" style="display: none">
+            <h4>Back Side of Board</h4>
+            <div class="backboard" id="sidetwo">
+                <div class="section" id="roots"></div>
+                <div class="section" id="prefixes"></div>
+                <div class="section" id="endingsright"></div>
+                <div class="section" id="endingsbottom"></div>
             </div>
-            <div class="section" id="prefixes">
-            </div>
-            <div class="section" id="endingsright">
-            </div>
-            <div class="section" id="endingsbottom">
-            </div>
-
         </div>
     </div>
+
 </body>
 
 

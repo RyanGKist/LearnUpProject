@@ -38,6 +38,9 @@ const connection = mongoose.createConnection("mongodb://localhost/learnup-db/ses
 // Because we import the mongoose.js file first, the mongoose is already set up with a promiseLibrary. Otherwise do:
 // mongoose.createConnection("mongodb://localhost/learnup-db/session", {promiseLibrary: global.Promise});
 
+
+
+
 // Tell express 'app' to use 'session', and
 // give 'session' a dummy string for encryption:
 app.use(session({ secret: 'codingdojorocks',
@@ -108,6 +111,7 @@ const server = app.listen(8000, () => {
 // ==============================================
 // Require 'socket.io' Module & tell it to listen to 'server':
 const io = require('socket.io').listen(server);
+
 // Returns an "io" object to control sockets!
 
 // SETUP a 'connection' EVENT to listen to any client that connects to our server socket:
@@ -124,16 +128,39 @@ io.sockets.on('connection', (socket) => {
   });
 
   socket.on('create', (room) => {
-    console.log('joined room');
+    console.log('created room');
     socket.join(room);
-    io.to(room).emit('user_joined', { response: `user joined room ${room}` });
+    io.to(room).emit('user_joined', { response: `user created room ${room}` });
   });
 
   socket.on('join room', (room) => {
-    console.log('joined room');
+    console.log('joined room', room);
     socket.join(room);
-    io.to(room).emit('user_joined', { response: `user joined room ${room}` });
+    console.log(socket.adapter.rooms[room])
+
+    var destination = '/';
+
+    if ( socket.adapter.rooms[room].length<=2 ){
+      io.to(room).emit('user_joined', { response: `user joined room ${room}`, users: socket.adapter.rooms[room].length});
+    }
+    else if(socket.adapter.rooms[room].length>2){
+      socket.emit('full', destination);
+    }
   });
+
+  // indicates if user has tab hidden or minimized
+  socket.on('paying_attention_status', (room, attentionStatus) => {
+    console.log(room);
+    io.to(room).emit('attention_status', {response: `user ${socket.id} is paying attention: ${attentionStatus}`});
+  });
+
+  socket.on('leave room', (room) =>{
+    console.log('In leave room',room);
+    socket.leave('room', function (err) {
+      console.log(err); // display null
+      console.log(socket.adapter.rooms[room])
+    });
+  })
 
   socket.on('tile_clicked', (data) => {
     socket.broadcast.to(data.room).emit('server_response', { response: data });
@@ -154,4 +181,15 @@ io.sockets.on('connection', (socket) => {
   socket.on('reset', (data) => {
     socket.broadcast.to(data.room).emit('reset_tiles');
   });
+
+  socket.on('switch', (data) => {
+    socket.broadcast.to(data.room).emit('switch_boards');
+  });
+
+  socket.on('terminate', (data) => {
+    socket.broadcast.to(data.room).emit('terminate_by_teacher');
+    io.emit('user disconnected');
+  });
+
+
 });
