@@ -116,7 +116,8 @@
 				var interaction = event.interaction;
 
 				// if the pointer was moved while being held down
-				// and an interaction hasn't started yet
+				// interaction hasn't started yet
+				// and target has the div "tile-source" in it
 				if (interaction.pointerIsDown && !interaction.interacting() && event.currentTarget.classList.contains('tile-source')) {
 
 					var original = event.currentTarget;
@@ -132,14 +133,16 @@
 					// Remove CSS class using JS only (not jQuery or jQLite) - http://stackoverflow.com/a/2155786/4972844
 					clone.className = clone.className.replace(/\btile-source\b/,'cloned-tile');
 
-					// Adds CSS style to cloned tile to position it over the tile source
+					// Adds CSS style to cloned tile to position it over its tile source
 					clone.style.position = "absolute";
 					clone.style.top = position.top + "px";
 					clone.style.left = position.left + "px";
 						
-					// insert the clone to the page
-					if(backside.style.display == "none"){
+					
+					if(backside.style.display == "none"){	
+						// insert the clone to the page
 						document.getElementsByClassName('section')[0].appendChild(clone);
+						// for each board, make the id of each cloned tile unique
 						list = document.getElementsByClassName('cloned-tile');
 						for (var i = 1; i <= list.length; i++) {
 							clone.id = original.id + (i + 1);
@@ -156,18 +159,11 @@
 					interaction.start({ name: 'drag' }, event.interactable, clone);
 
 					//set up the highlight listeners for hover/mouseover event after tile has been cloned
-					$("div.draggable").hover(function (event) {
-						$(this).addClass('magenta');
-						socket.emit("hoveron", { room: roomName, id: event.currentTarget.id });
-					}, function (event) {
-						$(this).removeClass('magenta');
-						socket.emit("hoveroff", { room: roomName, id: event.currentTarget.id });
-					}
-					);
+					setUpHoverEvent();
 
 				} else {
-
 					interaction.start({ name: 'drag' }, event.interactable, event.currentTarget);
+					setUpHoverEvent();
 
 				}
 				socket.emit('tile_duplicated', { room: roomName, id: id, clone: clone })
@@ -175,7 +171,6 @@
 
 			socket.on('tileduplicate', function (data) {
 
-				var interaction = event.interaction;
 				var target = document.getElementById(data.response.id);
 				var p = $(target);
 				var position = p.position();
@@ -199,14 +194,12 @@
 						clone.id = target.id + (i + 1);
 					}
 				}
-
-				clone.classList.remove('magenta');
-				target.classList.remove('magenta');
-
-				})
+			})
 
             function dragMoveListener(event) {
+				//makes sure that only cloned tiles can be dragged
 				if (event.currentTarget.classList.contains('cloned-tile')) {
+
 					//grab object that will be dragged and set in target variable
 					var target = event.target;
 
@@ -233,6 +226,7 @@
                 socket.emit('tile_clicked', { room: roomName, x: x, y: y, id: id })
             }
 
+			// for when a tile is in movement
             socket.on('server_response', function (data) {
                 var target = document.getElementById(data.response.id);
                 target.setAttribute('data-x', data.response.x);
@@ -241,10 +235,6 @@
                 target.classList.add('moving');
                 target.style.webkitTransform =
                     target.style.transform = 'translate(' + data.response.x + 'px, ' + data.response.y + 'px)';
-
-                //data.response.target.setAttribute('data-x', data.response.x);
-                //data.response.target.setAttribute('data-y', data.response.y);
-
             })
 
             socket.on('deselect', function (data) {
@@ -265,8 +255,18 @@
             socket.on("reset_tiles", function () {
                 setBoard()
             })
-        
-
+		
+			//set up the highlight listeners for hover/mouseover event
+			function setUpHoverEvent(){
+				$("div.draggable").hover(function (event) {
+						$(this).addClass('magenta');
+						socket.emit("hoveron", { room: roomName, id: event.currentTarget.id });
+					}, function (event) {
+						$(this).removeClass('magenta');
+						socket.emit("hoveroff", { room: roomName, id: event.currentTarget.id });
+					}
+					);
+			}
 
             function setBoard() {
                 $.get('http://localhost:8000/tiles').then((tiles) => {
@@ -288,20 +288,11 @@
                     ]
                     renderSet(tileSets)
 
-                    //set up the highlight listeners for hover/mouseover event
-                    $("div.draggable").hover(function (event) {
-                        $(this).addClass('magenta');
-                        socket.emit("hoveron", { room: roomName, id: event.currentTarget.id });
-
-                    }, function (event) {
-                        $(this).removeClass('magenta');
-                        socket.emit("hoveroff", { room: roomName, id: event.currentTarget.id });
-                    }
-                    );
+                    setUpHoverEvent();
 
                     //set up the socket events for hover / mouseover event
                     socket.on('hover_on', (data) => {
-                        var target = document.getElementById(data.response.id)
+                        var target = document.getElementById(data.response.id);
                         target.classList.add('magenta');
                     })
 
