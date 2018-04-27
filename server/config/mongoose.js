@@ -88,7 +88,7 @@ const tilesSideTwo = require('../../static/tilesSideTwo.json');
 const Sideone = mongoose.model('Sideone');
 const Sidetwo = mongoose.model('Sidetwo');
 
-function addTiles(tilesSideOne, tilesSideTwo) {
+function addTiles(tiles) {
   const {
     starstop, starsleft, starsright, starsbottom, dipper, crescent, earth,
   } = tilesSideOne.sideone;
@@ -120,19 +120,13 @@ function addTiles(tilesSideOne, tilesSideTwo) {
 }
 
 Sideone.findOne({})
-  .then((tile) => {
-    if (tile) {
-    } else {
+  .then((tiles) => {
       addTiles(tiles);
-    }
   })
   .catch(error => console.log(error));
 
 Sidetwo.findOne({})
-  .then((tile) => {
-    if (tile) {
-    } else {
+  .then((tiles) => {
       addTiles(tiles);
-    }
   })
   .catch(error => console.log(error));
