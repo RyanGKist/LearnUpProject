@@ -1,6 +1,6 @@
 body {
   font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen-Sans,
-    Ubuntu, Cantarell, Helvetica Neue, sans-serif;
+  Ubuntu, Cantarell, Helvetica Neue, sans-serif;
 }
 
 .container {
@@ -61,4 +61,55 @@ table th {
 
 .forgetpw{
   float: right;
+}
+
+/* index page */
+#wrapper {
+  margin: 0;
+  padding: 2em;
+}
+
+#header {
+  background-color: black !important;
+  color: white;
+}
+
+#header h1 {
+  margin: 0;
+  padding: 0.5em 0.5em 0.5em 1em;
+}
+
+#form {
+  background-color: white !important;
+}
+
+#formButton {
+  background-color: darkorange;
+  color: white;
+  border: 0;
+}
+
+label {
+  margin-top: 1em !important;
+}
+
+legend {
+  color: darkorange !important;
+}
+
+#walkthrough {
+  margin-left: 12em;
+}
+
+#walkthrough h2 {
+  margin: 0 0 0.5em 0;
+  color: darkorange;
+}
+
+#walkthrough p {
+  margin-bottom: 2em;
+}
+
+iframe {
+  margin-bottom: 3em;
 }
