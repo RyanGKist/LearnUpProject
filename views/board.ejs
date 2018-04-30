@@ -31,7 +31,10 @@
             var socket = io.connect();
             var admin = document.getElementById('Welcome').getAttribute("admin")
 
-            // user joins room
+            /* ======================== 
+            ONLINE STATUS (GREEN LIGHT)
+            ======================== */
+
             function joinRoom() {
                 socket.emit("join room", roomName);
             }
@@ -46,20 +49,34 @@
                 // console.log('ids', data.ids);
                 // console.log('admin',admin);
 
-                if (data.users == 2) {
-                    $("#student_light").addClass('online');
+                if (admin) { //when teacher enters room
+                    if ($("#teacher_light").hasClass('online')) {
+                        $("#teacher_light").toggleClass('online');
+                    } else {
+                        $("#teacher_light").addClass('online'); 
+                        $("#student_light").addClass('offline'); 
+                    }
                 }
 
-                if (admin) {
-                    $("#teacher_light").addClass('online');
+                if (data.users == 2) { //when student joins in
+                    $("#student_light").toggleClass('offline'); 
+
+                    if ($("#student_light").hasClass('online')) {
+                        $("#student_light").toggleClass('online');
+                    } else {
+                        $("#student_light").addClass('online'); 
+                    }
                 }
 
             });
 
             joinRoom()
 
-            // indicates if user has tab hidden or minimized
-            var attentionStatus;
+            /* ============================ 
+            ATTENTION STATUS (YELLOW LIGHT)
+            ============================ */
+
+            var attentionStatus; // indicates if user has tab hidden or minimized (boolean)
 
             document.addEventListener("visibilitychange", function() {
                 // console.log( document.hidden );
@@ -72,16 +89,31 @@
             });
 
             socket.on('attention_status', function(data) {
-                $("#student_light").toggleClass('online'); //toggle off green light
-                
-                if ($("#student_light").hasClass('not_paying_attention')) {   //if class is present
-                    $("#student_light").toggleClass('not_paying_attention');  //toggle off yellow to toggle on green
-                } else {
-                    $("#student_light").addClass('not_paying_attention'); // add class for yellow light
+                console.log(data);
+                if (attentionStatus == false) { //not paying attention
+                    $("#student_light").toggleClass('online'); //toggle off green light
+                    
+                    if ($("#student_light").hasClass('not_paying_attention')) {   //if class is present
+                        $("#student_light").toggleClass('not_paying_attention');  //toggle off yellow to toggle on green
+                    } else {
+                        $("#student_light").addClass('not_paying_attention'); // add class for yellow light
+                    }
+                } else { //paying attention
+                    $("#student_light").toggleClass('online');
+
+                    if ($("#student_light").hasClass('not_paying_attention')) {
+                        $("#student_light").toggleClass('not_paying_attention');
+                    } else {
+                        $("#student_light").addClass('not_paying_attention');
+                    }
+
                 }
-                
                 console.log('the server says: ' + data.response);
             });
+
+            /* =================
+            INTERACT - tile drag
+            ================= */
 
             interact('.draggable')
                 .draggable({
@@ -339,44 +371,33 @@
                 }
             }
             
+            /* ================
+            OFFLINE (RED LIGHT)
+            ================ */
+                
+            function terminateButtonPressed() {
+                $( "#class_over" ).html("Class is over, thank you!");
+                $("#teacher_light").toggleClass('online');
+                $("#teacher_light").addClass('offline');
+            }
+
             $("#terminate").click(() => {
-        socket.emit("terminate", {
-          room: roomName
-        })
-        terminateButtonPressed()
-      })
+                socket.emit("terminate", {
+                    room: roomName
+                })
+                terminateButtonPressed()
+            });
 
-      function terminateButtonPressed() {
-        $( "#class_over" ).html("Class is over, thank you!");
-      }
-
-      socket.on("terminate_by_teacher", function () {
-        terminateButtonPressed()
-      })
-      
-      socket.on("user disconnected", function(){
-        // console.log("user disconnected from client side");
-        $( "#logout_msg" ).html("the other user left the room");
-      })
-
-    $("#terminate").click(() => { socket.emit("terminate", { room: roomName }) 
-        terminateButtonPressed()
-    })
-
-    function terminateButtonPressed() {
-        $( "#class_over" ).html("Class is over, thank you!"); 
-    }
-    socket.on("terminate_by_teacher", function () {
-        terminateButtonPressed() 
-    })
-    socket.on("user disconnected", function(){ 
-        console.log("user disconnected from client side"); 
-        $( "#logout_msg" ).html("the other user left the room"); 
-    })
+            socket.on("terminate_by_teacher", function () {
+                terminateButtonPressed()
+            });
+        
+            socket.on("user disconnected", function() {
+                console.log("user disconnected from client side");
+                $( "#logout_msg" ).html("the other user left the room");
+            });
 
         });
-
-
 
     </script>
 </head>
