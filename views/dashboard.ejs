@@ -260,6 +260,27 @@
                         </div>
                     </div>
                     <% } %>
+                    <% if (user.admin <= 8) { %>
+                        <form class="col-md-5 admin-tools" name="editexisting" id="editexisting" method="post" action="/resetpw">
+                            <h5>Reset Password</h5>
+                            <div class="form-group">
+                                <input type="hidden" class="form-control" name="edituseremail" value="<%=user.email%>">
+                            </div>
+                            <div class="form-group">
+                                <label for="password">Password</label>
+                                <input type="password" class="form-control" name="edituserpassword" placeholder="Enter new password" id="password">
+                                <label id="edituserpassword-error" class="error" for="password"></label>
+                            </div>
+                            <div class="form-group">
+                                <label for="confirmpw">Confirm PW</label>
+                                <input type="password" class="form-control" name="edituserconfirmpw" placeholder="Confirm new password">
+                                <label id="edituserconfirmpw-error" class="error" for="confirmpw"></label>
+                            </div>
+                            <div class="form-group">
+                                <button type="submit" name="" class="btn btn-primary pull-right">Reset Password</button>
+                            </div>
+                        </form>
+                    <% } %>
     </div>
 </body>
 
