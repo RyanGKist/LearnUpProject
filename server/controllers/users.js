@@ -73,44 +73,38 @@ module.exports = {
               admin,
               hash: newHash,
             }).then((newUser) => {
-              var newUserEmail = request.body.newuseremail;
-              var transporter = nodemailer.createTransport({
-                service: 'gmail',
-                auth: {
-                  user: 'learnup2017@gmail.com',
-                  pass: 'Dojo2017'
-                }
-              });
-
-              var content = `
-            <h2>You have a new account created by the admin of LearnUP team.</h2>
-            <h2>Your temporary password is : (Daniel is working on the temporary password)</h2>
-            <h2>Please go to (deploy website) to login and change your password.</h2>
-            <h3>LearnUP</h3>`
-
-              var mailList = [
-                newUserEmail,
-                "learnup2017@gmail.com"
-              ]
-
-              var mailOptions = {
-                from: 'omar.ihmoda@gmail.com',
-                to: mailList,
-                subject: 'New account from LearnUP',
-                html: content
-              };
-
-              transporter.sendMail(mailOptions, function (error, info) {
-                if (error) {
-                  console.log(error);
-                } else {
-                  console.log('Email sent: ' + info.response);
-                }
-              });
-
-
+            newUser.resettoken = jwt.sign({ email: newUser.email }, secret, { expiresIn: '24h' });
+            var transporter = nodemailer.createTransport({
+              service: 'gmail',
+              auth: {
+                user: 'learnup2017@gmail.com',
+                pass: 'Dojo2017'
+              }
+            });
+  
+            var content = `
+              Hello,<br><br> You have a new account created by the admin of LearnUP team. Please click on the link below to reset your password: <br>
+              <a href="http://localhost:8000/reset/${newUser.resettoken}">http://localhost:8000/reset/${newUser.resettoken}</a><br><br>
+              Your temporary password will expire in 24 hours.<br><br>
+              Please login and change your password.<br><br>
+              LearnUP San Jose`
+  
+            var mailOptions = {
+              from: 'learnup2017@gmail.com',
+              to: newUser.email,
+              subject: 'Your new LearnUP account',
+              html: content
+            };
+  
+            transporter.sendMail(mailOptions, function (error, info) {
+              if (error) {
+                console.log(error);
+              } else {
+                console.log('Email sent: ' + info.response);
+              }
+            });
+            
               request.flash('exists', `Successfully added ${newUser.email}.`);
-              console.log("hi", newUserEmail);
               response.redirect('admin/dashboard');
             });
           });
@@ -261,12 +255,11 @@ module.exports = {
             `
 
           var mailList = [
-            user.email,
-            "learnup2017@gmail.com"
+            user.email
           ]
 
           var mailOptions = {
-            from: 'omar.ihmoda@gmail.com',
+            from: 'learnup2017@gmail.com',
             to: mailList,
             subject: 'Rest Password Link Request',
             html: content
@@ -316,7 +309,40 @@ module.exports = {
           updateUser.hash = newHash;
           updateUser.save().then((user) => {
             request.flash('exists', `Successfully edited account details for ${user.email}.`);
-            response.redirect('admin/dashboard');
+            // updateUser.passwordReset = true;
+            if(updateUser.passwordReset == false){
+              var transporter = nodemailer.createTransport({
+                service: 'gmail',
+                auth: {
+                  user: 'learnup2017@gmail.com',
+                  pass: 'Dojo2017'
+                }
+              });
+    
+              var content = ` 
+              New user ${updateUser.email} has login and changed the password.
+                `
+
+              var mailOptions = {
+                from: 'learnup2017@gmail.com',
+                to: 'learnup2017@gmail.com',
+                subject: 'New User Reset Password',
+                html: content
+              };
+    
+              transporter.sendMail(mailOptions, function (error, info) {
+                if (error) {
+                  console.log(error);
+                } else {
+                  console.log('Email sent: ' + info.response);
+                }
+              });
+
+              updateUser.passwordReset == true;
+            }
+
+
+            response.redirect('admin');
           });
         });
       } else {
@@ -324,9 +350,6 @@ module.exports = {
         response.redirect('admin/dashboard');
       }
     });
-    
-
   }
-
 
 };
