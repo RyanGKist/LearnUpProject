@@ -83,10 +83,10 @@ module.exports = {
             });
   
             var content = `
-              Hello,<br><br> You have a new account created by the admin of LearnUP team. Please click on the link below to reset your password: <br>
+              Hello,<br><br> You have a new account created by the admin of LearnUP team. Please click on this link below to set your password: <br>
               <a href="http://localhost:8000/reset/${newUser.resettoken}">http://localhost:8000/reset/${newUser.resettoken}</a><br><br>
-              Your temporary password will expire in 24 hours.<br><br>
-              Please login and change your password.<br><br>
+              This link will expire in 24 hours.<br><br>
+              
               LearnUP San Jose`
   
             var mailOptions = {
@@ -307,45 +307,42 @@ module.exports = {
       if (updateUser) {
         bcrypt.hash(request.body.edituserpassword, 10).then((newHash) => {
           updateUser.hash = newHash;
+          if(updateUser.passwordReset == undefined){
+            updateUser.passwordReset = 1;
+            var transporter = nodemailer.createTransport({
+              service: 'gmail',
+              auth: {
+                user: 'learnup2017@gmail.com',
+                pass: 'Dojo2017'
+              }
+            });
+  
+            var content = ` 
+            New user ${updateUser.email} has login and changed the password.
+              `
+
+            var mailOptions = {
+              from: 'learnup2017@gmail.com',
+              to: 'learnup2017@gmail.com',
+              subject: 'New User Reset Password',
+              html: content
+            };
+  
+            transporter.sendMail(mailOptions, function (error, info) {
+              if (error) {
+                console.log(error);
+              } else {
+                console.log('Email sent: ' + info.response);
+              }
+            });
+          }
           updateUser.save().then((user) => {
             request.flash('exists', `Successfully edited account details for ${user.email}.`);
-            // updateUser.passwordReset = true;
-            if(updateUser.passwordReset == false){
-              var transporter = nodemailer.createTransport({
-                service: 'gmail',
-                auth: {
-                  user: 'learnup2017@gmail.com',
-                  pass: 'Dojo2017'
-                }
-              });
-    
-              var content = ` 
-              New user ${updateUser.email} has login and changed the password.
-                `
-
-              var mailOptions = {
-                from: 'learnup2017@gmail.com',
-                to: 'learnup2017@gmail.com',
-                subject: 'New User Reset Password',
-                html: content
-              };
-    
-              transporter.sendMail(mailOptions, function (error, info) {
-                if (error) {
-                  console.log(error);
-                } else {
-                  console.log('Email sent: ' + info.response);
-                }
-              });
-
-              updateUser.passwordReset == true;
-            }
-
-
             response.redirect('admin');
           });
         });
-      } else {
+      } 
+      else {
         request.flash('exists', `Could not find user ${request.body.edituseremail}.`);
         response.redirect('admin/dashboard');
       }

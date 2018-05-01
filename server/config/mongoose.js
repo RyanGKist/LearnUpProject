@@ -72,11 +72,11 @@ function addDummyAccounts(dummyUsers) {
 }
 
 User.findOne({ email: 'omar.ihmoda@gmail.com' }, (error, result) => {
-  console.log("In mongoose.js: findOne({omar.ihmoda@gmail.com})");
+  // console.log("In mongoose.js: findOne({omar.ihmoda@gmail.com})");
   if (error) {
     console.log("In mongoose file with error on find user email method:", error);
   } else if (!result) {
-    console.log("In mongoose.js: findOne({omar.ihmoda@gmail.com}) - no result returned, creating default users...");
+    // console.log("In mongoose.js: findOne({omar.ihmoda@gmail.com}) - no result returned, creating default users...");
     addDummyAccounts(users);
   }
 });
