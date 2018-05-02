@@ -20,7 +20,7 @@ const UserSchema = new mongoose.Schema(
     hash: { type: String, required: true },
     admin: { type: Number, required: true },
     resettoken: { type: String, required: false },
-    passwordReset: { type: Boolean, default: false }
+    passwordReset: { type: Number, required: false}
   },
   { timestamps: true },
 );

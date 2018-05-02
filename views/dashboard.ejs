@@ -21,9 +21,9 @@
     <!-- Generating random REGEX expression when press generate room -->
     <script src="https://github.com/fent/randexp.js/releases/download/v0.4.3/randexp.min.js"></script>
 
-    
+
     <script>
-    $(document).ready(function () {
+        $(document).ready(function () {
             console.log("Document Ready");
             // validate register email field on keyup and submit
             $("#registernew").validate({
@@ -69,7 +69,7 @@
             });
 
             // generateRandomPassword
-            
+
         });
     </script>
 
@@ -137,7 +137,7 @@
                                     <input readonly type="text" class="form-control" id="meetingurl" placeholder="">
                                 </div>
                             </div>
-                            
+
                             <form id="enterRoom" class="col-md-4" method="get">
                                 <div class="form-group">
                                     <button type="submit" name="" id="enterRoomButton" class="btn btn-primary disabled">Enter Room</button>
@@ -213,7 +213,7 @@
                                 <h5>Register New User</h5>
                                 <div class="form-group">
                                     <label for="newuseremail">Email</label>
-                                    <input type="text" class="form-control"  name="newuseremail" placeholder="Enter email">
+                                    <input type="text" class="form-control" name="newuseremail" placeholder="Enter email">
                                     <label id="newuseremail-error" class="error" for="newuseremail"></label>
                                 </div>
                                 <div class="form-group">
@@ -260,27 +260,27 @@
                         </div>
                     </div>
                     <% } %>
-                    <% if (user.admin <= 8) { %>
-                        <form class="col-md-5 admin-tools" name="editexisting" id="editexisting" method="post" action="/resetpw">
-                            <h5>Reset Password</h5>
-                            <div class="form-group">
-                                <input type="hidden" class="form-control" name="edituseremail" value="<%=user.email%>">
-                            </div>
-                            <div class="form-group">
-                                <label for="password">Password</label>
-                                <input type="password" class="form-control" name="edituserpassword" placeholder="Enter new password" id="password">
-                                <label id="edituserpassword-error" class="error" for="password"></label>
-                            </div>
-                            <div class="form-group">
-                                <label for="confirmpw">Confirm PW</label>
-                                <input type="password" class="form-control" name="edituserconfirmpw" placeholder="Confirm new password">
-                                <label id="edituserconfirmpw-error" class="error" for="confirmpw"></label>
-                            </div>
-                            <div class="form-group">
-                                <button type="submit" name="" class="btn btn-primary pull-right">Reset Password</button>
-                            </div>
-                        </form>
-                    <% } %>
+                        <% if (user.admin <= 8) { %>
+                            <form class="col-md-5 admin-tools" name="editexisting" id="editexisting" method="post" action="/resetpw">
+                                <h5>Reset Password</h5>
+                                <div class="form-group">
+                                    <input type="hidden" class="form-control" name="edituseremail" value="<%=user.email%>">
+                                </div>
+                                <div class="form-group">
+                                    <label for="password">Password</label>
+                                    <input type="password" class="form-control" name="edituserpassword" placeholder="Enter new password" id="password">
+                                    <label id="edituserpassword-error" class="error" for="password"></label>
+                                </div>
+                                <div class="form-group">
+                                    <label for="confirmpw">Confirm PW</label>
+                                    <input type="password" class="form-control" name="edituserconfirmpw" placeholder="Confirm new password">
+                                    <label id="edituserconfirmpw-error" class="error" for="confirmpw"></label>
+                                </div>
+                                <div class="form-group">
+                                    <button type="submit" name="" class="btn btn-primary pull-right">Reset Password</button>
+                                </div>
+                            </form>
+                            <% } %>
     </div>
 </body>
 
@@ -302,10 +302,10 @@
         var room = document.getElementById('genRoomButton').getAttribute('name')
         // document.getElementById("genRoomButton").setAttribute
         // getAttribute('name')
-        
+
         // gennerate a random 6 character regex for room
         // var roomExtend = new RandExp(/^[0-9,A-Z]{6}$/).gen()
-        
+
         document.getElementById('enterRoomButton').classList.remove("disabled")
         document.getElementById('enterRoom').setAttribute("action", "/room/" + room)
         document.getElementById("meetingurl").setAttribute("value", "http://localhost:8000/room/" + room)
