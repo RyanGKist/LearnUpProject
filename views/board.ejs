@@ -46,18 +46,18 @@
             socket.on('user_joined', function (data) {
                 //Display 'data' received on the 'client' browser console:
                 console.log('The server says: ' + data.response);
-                // console.log('ids', data.ids);
-                // console.log('admin',admin);
 
-                if (admin) { //when teacher enters room
-                    if ($("#teacher_light").hasClass('online')) {
-                        $("#teacher_light").toggleClass('online');
-                    } else {
-                        $("#teacher_light").addClass('online');
-                        $("#student_light").addClass('offline');
-                    }
+                if (admin) { 
+                    $("#teacher_light").addClass('online'); 
+                    $("#student_light").addClass('offline'); 
                 }
 
+                if (data.users == 2) { //when student joins in
+                    console.log("turning student light green");
+                    $("#student_light").removeClass('not_paying_attention');
+                    $("#student_light").removeClass('offline');
+                    $("#student_light").addClass('online');
+                }
             });
 
             joinRoom()
@@ -78,7 +78,7 @@
                 socket.emit('paying_attention_status', roomName, attentionStatus);
             });
 
-            socket.on('attention_status', function (data) { //this runs every attention status change, and when student disconnects
+            socket.on('attention_status', function(data) { //this runs every attention status change, and when student disconnects
                 console.log('the server says: ' + data.response);
 
                 $("#student_light").toggleClass('online'); //toggle green light on or off
@@ -368,7 +368,8 @@
 
             socket.on("user disconnected", function () {
                 console.log("user disconnected from client side");
-                $("#logout_msg").html("the other user left the room");
+                $("#student_light").removeClass('not_paying_attention');
+                $("#student_light").addClass('offline');
             });
 
         });
@@ -383,6 +384,11 @@
             <div id="logout_msg"></div>
 
             <% if (admin) {%>
+                <div id="light">
+                    <div id="student_light"></div>
+                    <h5>Student</h5>
+                </div>
+
                 <div class="text-right align-top ib">
                     <button class="btn btn-success ib" id="switch">Switch Sides</button>
                     <!-- <a href="/admin/dashboard">
@@ -407,13 +413,6 @@
                             <h5>Teacher</h5>
                         </div>
                         <% } %>
-
-                            <!-- <div id="light">
-                <div id="teacher_light"></div>
-                <h5>Teacher</h5>
-                    <div id="student_light"></div>
-                <h5>Student</h5>
-            </div> -->
 
         </div>
 
