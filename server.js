@@ -133,32 +133,52 @@ io.sockets.on('connection', (socket) => {
     io.to(room).emit('user_joined', { response: `user created room ${room}` });
   });
 
+  //user joins room
   socket.on('join room', (room) => {
     console.log('joined room', room);
     socket.join(room);
-    console.log(socket.adapter.rooms[room])
+    console.log(socket.adapter.rooms[room]);
 
     var destination = '/';
 
-    if ( socket.adapter.rooms[room].length<=2 ){
-      io.to(room).emit('user_joined', { response: `user joined room ${room}`, users: socket.adapter.rooms[room].length});
+    if (socket.adapter.rooms[room].length <= 2) {
+      io.to(room).emit('user_joined', { response: `user joined room ${room}`, users: socket.adapter.rooms[room].length });
     }
-    else if(socket.adapter.rooms[room].length>2){
+    else if (socket.adapter.rooms[room].length > 2) {
       socket.emit('full', destination);
     }
   });
 
   // indicates if user has tab hidden or minimized
-  socket.on('paying_attention_status', (room, attentionStatus) => {
-    console.log(room);
-    io.to(room).emit('attention_status', {response: `user ${socket.id} is paying attention: ${attentionStatus}`});
+  socket.on('paying_attention_status', (roomName, attentionStatus) => {
+    var roomLength = 0;
+    
+    for (room in socket.adapter.rooms) {
+      if (room == roomName) {
+        continue;
+      }
+      roomLength++;
+    }
+
+    socket.on('disconnect', (room) => {
+      console.log("user disconnected");
+      roomLength--;
+      console.log("decrease", roomLength);
+      io.to(roomName).emit('user disconnected');
+    });
+
+    if (roomLength == 2) { 
+      console.log("has two members");
+      io.to(roomName).emit('attention_status', {response: `user ${socket.id} is paying attention: ${attentionStatus}`});
+    } 
+
   });
 
-  socket.on('leave room', (room) =>{
+  socket.on('leave room', (room) => {
     console.log('In leave room',room);
     socket.leave('room', function (err) {
-      console.log(err); // display null
-      console.log(socket.adapter.rooms[room])
+      // console.log(err); // display null
+      // console.log(socket.adapter.rooms[room])
     });
   })
 
