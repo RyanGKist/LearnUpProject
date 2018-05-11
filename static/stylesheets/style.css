@@ -113,3 +113,25 @@ legend {
 iframe {
   margin-bottom: 3em;
 }
+
+#left{
+  width: 25%;
+  display: inline-block;
+  vertical-align: top;
+}
+
+#right{
+  width: 70%;
+  display: inline-block;
+  vertical-align: top;
+}
+
+.checkbox{
+  display: inline-block;
+  vertical-align: bottom;
+}
+
+.forgetpw{
+  display: inline-block;
+  vertical-align: bottom;
+}

@@ -53,18 +53,8 @@
                     if ($("#teacher_light").hasClass('online')) {
                         $("#teacher_light").toggleClass('online');
                     } else {
-                        $("#teacher_light").addClass('online'); 
-                        $("#student_light").addClass('offline'); 
-                    }
-                }
-
-                if (data.users == 2) { //when student joins in
-                    $("#student_light").toggleClass('offline'); 
-
-                    if ($("#student_light").hasClass('online')) {
-                        $("#student_light").toggleClass('online');
-                    } else {
-                        $("#student_light").addClass('online'); 
+                        $("#teacher_light").addClass('online');
+                        $("#student_light").addClass('offline');
                     }
                 }
 
@@ -78,7 +68,7 @@
 
             var attentionStatus; // indicates if user has tab hidden or minimized (boolean)
 
-            document.addEventListener("visibilitychange", function() {
+            document.addEventListener("visibilitychange", function () {
                 // console.log( document.hidden );
                 if (document.hidden == false) { // if document is not hidden
                     attentionStatus = true; // student is paying attention
@@ -88,27 +78,11 @@
                 socket.emit('paying_attention_status', roomName, attentionStatus);
             });
 
-            socket.on('attention_status', function(data) {
-                console.log(data);
-                if (attentionStatus == false) { //not paying attention
-                    $("#student_light").toggleClass('online'); //toggle off green light
-                    
-                    if ($("#student_light").hasClass('not_paying_attention')) {   //if class is present
-                        $("#student_light").toggleClass('not_paying_attention');  //toggle off yellow to toggle on green
-                    } else {
-                        $("#student_light").addClass('not_paying_attention'); // add class for yellow light
-                    }
-                } else { //paying attention
-                    $("#student_light").toggleClass('online');
-
-                    if ($("#student_light").hasClass('not_paying_attention')) {
-                        $("#student_light").toggleClass('not_paying_attention');
-                    } else {
-                        $("#student_light").addClass('not_paying_attention');
-                    }
-
-                }
+            socket.on('attention_status', function (data) { //this runs every attention status change, and when student disconnects
                 console.log('the server says: ' + data.response);
+
+                $("#student_light").toggleClass('online'); //toggle green light on or off
+                $("#student_light").toggleClass('not_paying_attention'); //toggle yellow light on or off
             });
 
             /* =================
@@ -138,127 +112,127 @@
                             y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
                         target.classList.remove('moving');
                         socket.emit('finished_drag', { room: roomName, id: id })
-					}
-					
+                    }
+
                 }).on('move', function (event) {
-					setUpTileDuplication(event);
-				});
-			
-			function setUpTileDuplication(event) {
-				var interaction = event.interaction;
+                    setUpTileDuplication(event);
+                });
 
-				// if the pointer was moved while being held down
-				// interaction hasn't started yet
-				// and target has the div "tile-source" in it
-				if (interaction.pointerIsDown && !interaction.interacting() && event.currentTarget.classList.contains('tile-source')) {
+            function setUpTileDuplication(event) {
+                var interaction = event.interaction;
 
-					var original = event.currentTarget;
-					var id = original.id;
+                // if the pointer was moved while being held down
+                // interaction hasn't started yet
+                // and target has the div "tile-source" in it
+                if (interaction.pointerIsDown && !interaction.interacting() && event.currentTarget.classList.contains('tile-source')) {
 
-					//finds the position of the tile-source
-					var p = $(event.currentTarget);
-					var position = p.position();
-					
-					// create a clone of the currentTarget element
-					var clone = original.cloneNode(true);
+                    var original = event.currentTarget;
+                    var id = original.id;
 
-					// Remove CSS class using JS only (not jQuery or jQLite) - http://stackoverflow.com/a/2155786/4972844
-					clone.className = clone.className.replace(/\btile-source\b/,'cloned-tile');
+                    //finds the position of the tile-source
+                    var p = $(event.currentTarget);
+                    var position = p.position();
 
-					// Adds CSS style to cloned tile to position it over its tile source
-					clone.style.position = "absolute";
-					clone.style.top = position.top + "px";
-					clone.style.left = position.left + "px";
-						
-					
-					if(backside.style.display == "none"){	
-						// insert the clone to the page
-						document.getElementsByClassName('section')[0].appendChild(clone);
-						// for each board, make the id of each cloned tile unique
-						list = document.getElementsByClassName('cloned-tile');
-						for (var i = 1; i <= list.length; i++) {
-							clone.id = original.id + (i + 1);
-						}
-					}else{
-						document.getElementsByClassName('section')[5].appendChild(clone);
-						list = document.getElementsByClassName('cloned-tile');
-						for (var i = 1; i <= list.length; i++) {
-							clone.id = original.id + (i + 1);
-						}
-					}
+                    // create a clone of the currentTarget element
+                    var clone = original.cloneNode(true);
 
-					// start a drag interaction targeting the clone
-					interaction.start({ name: 'drag' }, event.interactable, clone);
+                    // Remove CSS class using JS only (not jQuery or jQLite) - http://stackoverflow.com/a/2155786/4972844
+                    clone.className = clone.className.replace(/\btile-source\b/, 'cloned-tile');
 
-					//set up the highlight listeners for hover/mouseover event after tile has been cloned
-					setUpHoverEvent();
+                    // Adds CSS style to cloned tile to position it over its tile source
+                    clone.style.position = "absolute";
+                    clone.style.top = position.top + "px";
+                    clone.style.left = position.left + "px";
 
-				} else {
-					interaction.start({ name: 'drag' }, event.interactable, event.currentTarget);
-					setUpHoverEvent();
 
-				}
-				socket.emit('tile_duplicated', { room: roomName, id: id, clone: clone })
-			}
+                    if (backside.style.display == "none") {
+                        // insert the clone to the page
+                        document.getElementsByClassName('section')[0].appendChild(clone);
+                        // for each board, make the id of each cloned tile unique
+                        list = document.getElementsByClassName('cloned-tile');
+                        for (var i = 1; i <= list.length; i++) {
+                            clone.id = original.id + (i + 1);
+                        }
+                    } else {
+                        document.getElementsByClassName('section')[5].appendChild(clone);
+                        list = document.getElementsByClassName('cloned-tile');
+                        for (var i = 1; i <= list.length; i++) {
+                            clone.id = original.id + (i + 1);
+                        }
+                    }
 
-			socket.on('tileduplicate', function (data) {
+                    // start a drag interaction targeting the clone
+                    interaction.start({ name: 'drag' }, event.interactable, clone);
 
-				var target = document.getElementById(data.response.id);
-				var p = $(target);
-				var position = p.position();
-				var clone = target.cloneNode(true);
-				clone.className = clone.className.replace(/\btile-source\b/,'cloned-tile');
+                    //set up the highlight listeners for hover/mouseover event after tile has been cloned
+                    setUpHoverEvent();
 
-				clone.style.position = "absolute";
-				clone.style.top = position.top + "px";
-				clone.style.left = position.left + "px";
+                } else {
+                    interaction.start({ name: 'drag' }, event.interactable, event.currentTarget);
+                    setUpHoverEvent();
 
-				if(backside.style.display == "none"){
-					document.getElementsByClassName('section')[0].appendChild(clone);
-					list = document.getElementsByClassName('cloned-tile');
-					for (var i = 1; i <= list.length; i++) {
-						clone.id = target.id + (i + 1);
-					}
-				}else{
-					document.getElementsByClassName('section')[5].appendChild(clone);
-					list = document.getElementsByClassName('cloned-tile');
-					for (var i = 1; i <= list.length; i++) {
-						clone.id = target.id + (i + 1);
-					}
-				}
-			})
+                }
+                socket.emit('tile_duplicated', { room: roomName, id: id, clone: clone })
+            }
+
+            socket.on('tileduplicate', function (data) {
+
+                var target = document.getElementById(data.response.id);
+                var p = $(target);
+                var position = p.position();
+                var clone = target.cloneNode(true);
+                clone.className = clone.className.replace(/\btile-source\b/, 'cloned-tile');
+
+                clone.style.position = "absolute";
+                clone.style.top = position.top + "px";
+                clone.style.left = position.left + "px";
+
+                if (backside.style.display == "none") {
+                    document.getElementsByClassName('section')[0].appendChild(clone);
+                    list = document.getElementsByClassName('cloned-tile');
+                    for (var i = 1; i <= list.length; i++) {
+                        clone.id = target.id + (i + 1);
+                    }
+                } else {
+                    document.getElementsByClassName('section')[5].appendChild(clone);
+                    list = document.getElementsByClassName('cloned-tile');
+                    for (var i = 1; i <= list.length; i++) {
+                        clone.id = target.id + (i + 1);
+                    }
+                }
+            })
 
             function dragMoveListener(event) {
-				//makes sure that only cloned tiles can be dragged
-				if (event.currentTarget.classList.contains('cloned-tile')) {
+                //makes sure that only cloned tiles can be dragged
+                if (event.currentTarget.classList.contains('cloned-tile')) {
 
-					//grab object that will be dragged and set in target variable
-					var target = event.target;
+                    //grab object that will be dragged and set in target variable
+                    var target = event.target;
 
-					//get the id of the target
-					id = event.currentTarget.id;
+                    //get the id of the target
+                    id = event.currentTarget.id;
 
-					// keep the dragged position in the data-x/data-y attributes 
-					x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx,
-						y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+                    // keep the dragged position in the data-x/data-y attributes 
+                    x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx,
+                        y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
 
-					// translate the element 
-					target.style.webkitTransform =
-						target.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
+                    // translate the element 
+                    target.style.webkitTransform =
+                        target.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
 
-					// update the position attributes 
-					target.setAttribute('data-x', x);
-					target.setAttribute('data-y', y);
+                    // update the position attributes 
+                    target.setAttribute('data-x', x);
+                    target.setAttribute('data-y', y);
 
-					//highlight tile 
-					target.classList.remove('magenta');
-					target.classList.add('moving');
-				}
+                    //highlight tile 
+                    target.classList.remove('magenta');
+                    target.classList.add('moving');
+                }
 
                 socket.emit('tile_clicked', { room: roomName, x: x, y: y, id: id })
             }
 
-			// for when a tile is in movement
+            // for when a tile is in movement
             socket.on('server_response', function (data) {
                 var target = document.getElementById(data.response.id);
                 target.setAttribute('data-x', data.response.x);
@@ -274,11 +248,11 @@
                 target.classList.remove('moving');
             })
 
-            $("#switch").click(() =>{
-                socket.emit("switch",{room: roomName})
+            $("#switch").click(() => {
+                socket.emit("switch", { room: roomName })
                 switchboard()
             })
-            
+
             $("#reset").click(() => {
                 socket.emit("reset", { room: roomName })
                 setBoard()
@@ -287,18 +261,18 @@
             socket.on("reset_tiles", function () {
                 setBoard()
             })
-		
-			//set up the highlight listeners for hover/mouseover event
-			function setUpHoverEvent(){
-				$("div.draggable").hover(function (event) {
-						$(this).addClass('magenta');
-						socket.emit("hoveron", { room: roomName, id: event.currentTarget.id });
-					}, function (event) {
-						$(this).removeClass('magenta');
-						socket.emit("hoveroff", { room: roomName, id: event.currentTarget.id });
-					}
-					);
-			}
+
+            //set up the highlight listeners for hover/mouseover event
+            function setUpHoverEvent() {
+                $("div.draggable").hover(function (event) {
+                    $(this).addClass('magenta');
+                    socket.emit("hoveron", { room: roomName, id: event.currentTarget.id });
+                }, function (event) {
+                    $(this).removeClass('magenta');
+                    socket.emit("hoveroff", { room: roomName, id: event.currentTarget.id });
+                }
+                );
+            }
 
             function setBoard() {
                 $.get('http://localhost:8000/tiles').then((tiles) => {
@@ -357,26 +331,26 @@
                 switchboard()
             })
 
-            function switchboard(){
+            function switchboard() {
                 var backside = document.getElementById('backside');
                 var frontside = document.getElementById('frontside');
 
-                if(backside.style.display == "none"){
+                if (backside.style.display == "none") {
                     $('#frontside').hide();
                     $('#backside').show();
                 }
-                else{
+                else {
                     $('#backside').hide();
                     $('#frontside').show();
                 }
             }
-            
+
             /* ================
             OFFLINE (RED LIGHT)
             ================ */
-                
+
             function terminateButtonPressed() {
-                $( "#class_over" ).html("Class is over, thank you!");
+                $("#class_over").html("Class is over, thank you!");
                 $("#teacher_light").toggleClass('online');
                 $("#teacher_light").addClass('offline');
             }
@@ -391,10 +365,10 @@
             socket.on("terminate_by_teacher", function () {
                 terminateButtonPressed()
             });
-        
-            socket.on("user disconnected", function() {
+
+            socket.on("user disconnected", function () {
                 console.log("user disconnected from client side");
-                $( "#logout_msg" ).html("the other user left the room");
+                $("#logout_msg").html("the other user left the room");
             });
 
         });
@@ -411,9 +385,9 @@
             <% if (admin) {%>
                 <div class="text-right align-top ib">
                     <button class="btn btn-success ib" id="switch">Switch Sides</button>
-                    <a href="/admin/dashboard">
+                    <!-- <a href="/admin/dashboard">
                         <button class="btn btn-primary ib">Back to Dashboard</button>
-                    </a>
+                    </a> -->
                     <button class="btn btn-warning ib" id="reset">Reset Board</button>
                     <a href="http://localhost:8000/admin/dashboard">
                         <button class="btn btn-danger ib" id="terminate">Terminate</button>
@@ -421,20 +395,20 @@
                 </div>
 
                 <div id="light">
-                        <div id="student_light"></div>
+                    <div id="student_light"></div>
                     <h5>Student</h5>
                 </div>
-            <% } %>
+                <% } %>
 
-            <% if (!admin) {%>
-                <div id="class_over"></div>
-                <div id="light">
-                    <div id="teacher_light"></div>
-                    <h5>Teacher</h5>
-                </div>
-            <% } %>
+                    <% if (!admin) {%>
+                        <div id="class_over"></div>
+                        <div id="light">
+                            <div id="teacher_light"></div>
+                            <h5>Teacher</h5>
+                        </div>
+                        <% } %>
 
-            <!-- <div id="light">
+                            <!-- <div id="light">
                 <div id="teacher_light"></div>
                 <h5>Teacher</h5>
                     <div id="student_light"></div>
@@ -442,42 +416,42 @@
             </div> -->
 
         </div>
-		
+
         <div id="frontside">
-			<h4>Front Side of Board</h4>
-			<div class="bothboards">
-				<div class="frontboard" id="sideone">
-					<div class="section" id="starstop">
-					</div>
-					<div class="section" id="starsleft">
-					</div>
-				
-					<div class="section" id="centerone">
-						<div id="crescent">
-						</div>
-						<div id="dipper">
-						</div>
-						<div id="earth">
-						</div>
-					</div>
-					<div class="section" id="starsright">
-					</div>
-					<div class="section" id="starsbottom">
-					</div>
-				</div>
-			</div>
+            <h4>Front Side of Board</h4>
+            <div class="bothboards">
+                <div class="frontboard" id="sideone">
+                    <div class="section" id="starstop">
+                    </div>
+                    <div class="section" id="starsleft">
+                    </div>
+
+                    <div class="section" id="centerone">
+                        <div id="crescent">
+                        </div>
+                        <div id="dipper">
+                        </div>
+                        <div id="earth">
+                        </div>
+                    </div>
+                    <div class="section" id="starsright">
+                    </div>
+                    <div class="section" id="starsbottom">
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div id="backside" style="display: none">
-			<h4>Back Side of Board</h4>
-			<div class="bothboards">
-				<div class="backboard" id="sidetwo">
-					<div class="section" id="roots"></div>
-					<div class="section" id="prefixes"></div>
-					<div class="section" id="endingsright"></div>
-					<div class="section" id="endingsbottom"></div>
-				</div>
-			</div>
+            <h4>Back Side of Board</h4>
+            <div class="bothboards">
+                <div class="backboard" id="sidetwo">
+                    <div class="section" id="roots"></div>
+                    <div class="section" id="prefixes"></div>
+                    <div class="section" id="endingsright"></div>
+                    <div class="section" id="endingsbottom"></div>
+                </div>
+            </div>
         </div>
     </div>
 

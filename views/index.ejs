@@ -18,69 +18,139 @@
 
     <!-- outer container -->
     <div id="wrapper">
+        <div id="left">
+            <!-- sign in form -->
+            <form class="well" action="#" method="post">
+                <fieldset>
+                    <legend>Sign In</legend>
 
-        <!-- sign in form -->
-        <form id ="form" class="well form col-md-3" action="#" method="post" id="contact_form">
-            <legend>Sign In</legend>
-
-            <!-- email field -->
-            <div class="inputField, form-group">
-                <label class="control-label col-md-2" for="email">Email:</label>
-                <div class="col-md-12 inputGroupContainer"> <!-- input field width -->
-                    <div class="input-group">
-                        <span class="input-group-addon"><i class="glyphicon glyphicon-envelope"></i></span>
-                        <input type="email" class="form-control" id="email" placeholder="Enter email" name="email">
+                    <!-- email field -->
+                    <div class="inputField, form-group">
+                        <label class="control-label col-md-2" for="email">Email:</label>
+                        <div class="col-md-12 inputGroupContainer">
+                            <!-- input field width -->
+                            <div class="input-group">
+                                <span class="input-group-addon">
+                                    <i class="glyphicon glyphicon-envelope"></i>
+                                </span>
+                                <input type="email" class="form-control" id="email" placeholder="Enter email" name="email">
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- password field -->
-            <div class="form-group">
-                <label class="control-label col-md-2" for="password">Password:</label>
-                <div class="col-md-12 inputGroupContainer">
-                    <div class="input-group">
-                        <span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
-                        <input type="password" class="form-control" id="password" placeholder="Password" name="password">
+                    <!-- password field -->
+                    <div class="form-group">
+                        <label class="control-label col-md-2" for="password">Password:</label>
+                        <div class="col-md-12 inputGroupContainer">
+                            <div class="input-group">
+                                <span class="input-group-addon">
+                                    <i class="glyphicon glyphicon-lock"></i>
+                                </span>
+                                <input type="password" class="form-control" id="password" placeholder="Password" name="password">
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- "Remember me" checkbox -->
-            <div class="form-group">
-                <div class="col-md-6">
-                    <div class="checkbox">
-                        <label><input type="checkbox" name="remember"> Remember me</label>
+                    <!-- "Remember me" checkbox -->
+                    <div class="form-group">
+                        <div class="col-md-6">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" name="remember"> Remember me</label>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- submit button -->
-            <div class="form-group">
-                <div class="col-md-10">
-                    <button type="submit" id="formButton" class="btn btn-default">Submit</button>
-                </div>
-            </div>
-        </form>
+                    <!-- submit button -->
+                    <div class="form-group">
+                        <div class="col-md-10">
+                            <button type="submit" id="formButton" class="btn btn-default">Submit</button>
+                        </div>
+                    </div>
+                </fieldset>
+            </form>
+            <!-- Admin Log in form -->
+            <form class="well" action="/login" method="post">
+                <fieldset>
+                    <legend>Admin Log In</legend>
 
-        
-        <!-- walkthrough section -->
-        <div class="row">
-            <div id="walkthrough" class="col-md-7">
-                <h2 class="text-center">Welcome!</h2>
+                    <% if (message.length > 0) { %>
+                        <p class="error-message">
+                            ***
+                            <%= message %>
+                        </p>
+                        <% } %>
 
-                <p>
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec molestie magna at arcu euismod sollicitudin. 
-                    Ut gravida metus tempus elit suscipit, vitae ullamcorper felis finibus. 
-                    Maecenas tellus quam, consectetur eu bibendum sed, pretium sed nisi. 
-                    Vestibulum ac metus in nunc accumsan tempus sed et nisl. Vivamus massa eros, lacinia nec laoreet quis, laoreet at neque. 
-                    Vivamus mi magna, commodo eget viverra id, facilisis sed nunc. 
-                    Morbi pulvinar eu tortor id placerat. 
-                    Maecenas nec ex eu magna accumsan ullamcorper at non nisl. 
-                    Praesent tristique enim vel hendrerit pharetra. Quisque at lectus sollicitudin, vulputate urna in, mollis dolor.
-                </p>
+                            <!-- email field -->
 
-                <div class="embed-responsive embed-responsive-16by9">
-                    <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/NpEaa2P7qZI?rel=0" allowfullscreen></iframe>
+                            <label class="control-label col-md-2" for="email">Email:</label>
+                            <div class="col-md-12 inputGroupContainer">
+                                <!-- input field width -->
+                                <div class="input-group">
+                                    <span class="input-group-addon">
+                                        <i class="glyphicon glyphicon-envelope"></i>
+                                    </span>
+                                    <input type="email" class="form-control" id="email" placeholder="Enter email" name="email">
+                                </div>
+                            </div>
+
+                            <!-- password field -->
+                            <div class="form-group">
+                                <label class="control-label col-md-2" for="password">Password:</label>
+                                <div class="col-md-12 inputGroupContainer">
+                                    <div class="input-group">
+                                        <span class="input-group-addon">
+                                            <i class="glyphicon glyphicon-lock"></i>
+                                        </span>
+                                        <input type="password" class="form-control" id="password" placeholder="Password" name="password">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- "Remember me" checkbox -->
+                            <div class="form-group">
+                                <div class="checkbox">
+                                    <div class="col-md-6">
+                                        <label><input type="checkbox" name="remember"> Remember me</label>
+                                    </div>
+                                </div>
+                                <div class='forgetpw'>  
+                                    <div class="col-md-6">                                  
+                                        <a href='forgetpw'>Forget password</a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- submit button -->
+                            <div class="form-group">
+                                <div class="col-md-10">
+                                    <button type="submit" id="formButton" class="btn btn-default">Submit</button>
+                                </div>
+                            </div>
+                </fieldset>
+            </form>
+
+        </div>
+
+        <div id="right">
+            <!-- walkthrough section -->
+            <div class="row">
+                <div id="walkthrough" class="col-md-7">
+                    <h2 class="text-center">Welcome!</h2>
+
+                    <p>
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec molestie magna at arcu euismod sollicitudin. Ut gravida metus
+                        tempus elit suscipit, vitae ullamcorper felis finibus. Maecenas tellus quam, consectetur eu bibendum
+                        sed, pretium sed nisi. Vestibulum ac metus in nunc accumsan tempus sed et nisl. Vivamus massa eros,
+                        lacinia nec laoreet quis, laoreet at neque. Vivamus mi magna, commodo eget viverra id, facilisis
+                        sed nunc. Morbi pulvinar eu tortor id placerat. Maecenas nec ex eu magna accumsan ullamcorper at
+                        non nisl. Praesent tristique enim vel hendrerit pharetra. Quisque at lectus sollicitudin, vulputate
+                        urna in, mollis dolor.
+                    </p>
+
+                    <div class="embed-responsive embed-responsive-16by9">
+                        <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/NpEaa2P7qZI?rel=0" allowfullscreen></iframe>
+                    </div>
                 </div>
             </div>
         </div>

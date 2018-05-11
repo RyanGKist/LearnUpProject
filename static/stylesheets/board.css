@@ -178,17 +178,18 @@ p {
   /* visibility: hidden; */
 }
 
-#light{
-  display: inline-block;
-
+#light {
+  display: block;
+  margin: 0 auto;
 }
 
 #teacher_light, #student_light{
   margin-left: 2rem;
-  height: 25px;
-  width: 25px;
+  height: 21px;
+  width: 21px;
   border-radius: 50%;
   display: inline-block;
+  vertical-align: top;
 }
 
 h5{
