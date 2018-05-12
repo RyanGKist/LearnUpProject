@@ -38,14 +38,14 @@ module.exports = {
             else {
               console.log('Error received on bcrypt compare, ');
               request.flash('error', 'Incorrect password ');
-              response.redirect('/admin');
+              response.redirect('/');
             }
           });
       })
       .catch((error) => {
         console.log('Did not find this user email address, ', error);
-        request.flash('error', 'Incorrect password');
-        response.redirect('/admin');
+        request.flash('error', 'Did not find this user email address');
+        response.redirect('/');
       });
   },
 
@@ -221,12 +221,12 @@ module.exports = {
             // earth: tiles.sideone.earth
           });
         } else {
-          response.redirect('admin');
+          response.redirect('/');
         }
       })
       .catch((error) => {
         console.log(error);
-        response.redirect('/admin');
+        response.redirect('/');
       });
   }, // <--- ADD ADDITIONAL METHODS SEPARATED BY A COMMA ','
 
@@ -338,7 +338,7 @@ module.exports = {
           }
           updateUser.save().then((user) => {
             request.flash('exists', `Successfully edited account details for ${user.email}.`);
-            response.redirect('admin');
+            response.redirect('/');
           });
         });
       } 
