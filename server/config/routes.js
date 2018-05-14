@@ -14,24 +14,28 @@ const tiles = require('../controllers/tiles.js');
 module.exports = function (app) {
   // Root route - renders index.ejs view (for socket.io example):
   app.get('/', (request, response) => {
-    response.render('index');
+    response.render('index', { message: request.flash('error') });
   });
+
+  app.get ('/forgetpw',(request, response) =>{
+    response.render('forgetpw', { message: request.flash('error') });
+  })
 
   app.get('/admin/dashboard', (request, response) => {
     if (request.session.user) {
       users.dashboard(request, response);
     } else {
-      response.redirect('/admin');
+      response.redirect('/index');
     }
   });
   // Admin route - renders admin.ejs:
-  app.get('/admin', (request, response) => {
-    response.render('admin', { message: request.flash('error') });
-  });
+  // app.get('/index', (request, response) => {
+  //   response.render('index', { message: request.flash('error') });
+  // });
 
   app.get('/logout', (request, response) => {
     request.session.destroy();
-    response.redirect('/admin');
+    response.redirect('/index');
   });
 
   // enter an individual learnup room
@@ -67,4 +71,16 @@ module.exports = function (app) {
   app.post('/delete/:id', (request, response) => {
     users.delete(request, response);
   });
+
+  app.post('/forgetpassword', (request, response) => {
+    users.forgetpassword(request, response)
+  });
+
+  app.get('/reset/:token', (request, response) => {
+    users.getUserinforgetpw(request, response)
+  });
+
+  app.post('/resetpw',(request, response) => {
+    users.resetpassword(request, response)
+  })
 };

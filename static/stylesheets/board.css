@@ -177,3 +177,33 @@ p {
 #sidetwo {
   /* visibility: hidden; */
 }
+
+#light {
+  display: block;
+  margin: 0 auto;
+}
+
+#teacher_light, #student_light{
+  margin-left: 2rem;
+  height: 21px;
+  width: 21px;
+  border-radius: 50%;
+  display: inline-block;
+  vertical-align: top;
+}
+
+h5{
+  display: inline-block;
+}
+
+.online{
+  background-color: #2cad48;
+}
+
+.offline{
+  background-color: red;
+}
+
+.not_paying_attention {
+  background-color: yellow;
+}

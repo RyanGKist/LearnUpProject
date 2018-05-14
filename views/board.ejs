@@ -29,21 +29,75 @@
         $(document).ready(function () {
             var roomName = document.getElementById('Welcome').getAttribute("name")
             var socket = io.connect();
+            var admin = document.getElementById('Welcome').getAttribute("admin")
+
+            /* ======================== 
+            ONLINE STATUS (GREEN LIGHT)
+            ======================== */
 
             function joinRoom() {
-                socket.emit("join room", roomName)
+                socket.emit("join room", roomName);
             }
+
+            socket.on('full', function (destination) {
+                window.location.href = destination;
+            })
 
             socket.on('user_joined', function (data) {
                 //Display 'data' received on the 'client' browser console:
                 console.log('The server says: ' + data.response);
+
+                if (admin) { 
+                    $("#teacher_light").addClass('online'); 
+                    $("#student_light").addClass('offline'); 
+                }
+
+                if (data.users == 2) { //when student joins in
+                    console.log("turning student light green");
+                    $("#student_light").removeClass('not_paying_attention');
+                    $("#student_light").removeClass('offline');
+                    $("#student_light").addClass('online');
+                }
             });
 
             joinRoom()
 
+            /* ============================ 
+            ATTENTION STATUS (YELLOW LIGHT)
+            ============================ */
+
+            var attentionStatus; // indicates if user has tab hidden or minimized (boolean)
+
+            document.addEventListener("visibilitychange", function () {
+                // console.log( document.hidden );
+                if (document.hidden == false) { // if document is not hidden
+                    attentionStatus = true; // student is paying attention
+                } else {
+                    attentionStatus = false; // not paying attention
+                }
+                socket.emit('paying_attention_status', roomName, attentionStatus);
+            });
+
+            socket.on('attention_status', function(data) { //this runs every attention status change, and when student disconnects
+                console.log('the server says: ' + data.response);
+
+                $("#student_light").toggleClass('online'); //toggle green light on or off
+                $("#student_light").toggleClass('not_paying_attention'); //toggle yellow light on or off
+            });
+
+            /* =================
+            INTERACT - tile drag
+            ================= */
+
             interact('.draggable')
                 .draggable({
                     inertia: true,
+
+                    restrict: {
+                        restriction: ".bothboards",
+                        endOnly: true,
+                        elementRect: { top: 0, left: 0, bottom: 1, right: 1 }
+                    },
 
                     onmove: dragMoveListener,
                     onend: function (event) {
@@ -52,41 +106,133 @@
 
                         //get the id of the target 
                         id = event.currentTarget.id
-                        
+
                         // keep the dragged position in the data-x/data-y attributes 
                         x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx,
                             y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
                         target.classList.remove('moving');
                         socket.emit('finished_drag', { room: roomName, id: id })
                     }
+
+                }).on('move', function (event) {
+                    setUpTileDuplication(event);
                 });
 
+            function setUpTileDuplication(event) {
+                var interaction = event.interaction;
+
+                // if the pointer was moved while being held down
+                // interaction hasn't started yet
+                // and target has the div "tile-source" in it
+                if (interaction.pointerIsDown && !interaction.interacting() && event.currentTarget.classList.contains('tile-source')) {
+
+                    var original = event.currentTarget;
+                    var id = original.id;
+
+                    //finds the position of the tile-source
+                    var p = $(event.currentTarget);
+                    var position = p.position();
+
+                    // create a clone of the currentTarget element
+                    var clone = original.cloneNode(true);
+
+                    // Remove CSS class using JS only (not jQuery or jQLite) - http://stackoverflow.com/a/2155786/4972844
+                    clone.className = clone.className.replace(/\btile-source\b/, 'cloned-tile');
+
+                    // Adds CSS style to cloned tile to position it over its tile source
+                    clone.style.position = "absolute";
+                    clone.style.top = position.top + "px";
+                    clone.style.left = position.left + "px";
+
+
+                    if (backside.style.display == "none") {
+                        // insert the clone to the page
+                        document.getElementsByClassName('section')[0].appendChild(clone);
+                        // for each board, make the id of each cloned tile unique
+                        list = document.getElementsByClassName('cloned-tile');
+                        for (var i = 1; i <= list.length; i++) {
+                            clone.id = original.id + (i + 1);
+                        }
+                    } else {
+                        document.getElementsByClassName('section')[5].appendChild(clone);
+                        list = document.getElementsByClassName('cloned-tile');
+                        for (var i = 1; i <= list.length; i++) {
+                            clone.id = original.id + (i + 1);
+                        }
+                    }
+
+                    // start a drag interaction targeting the clone
+                    interaction.start({ name: 'drag' }, event.interactable, clone);
+
+                    //set up the highlight listeners for hover/mouseover event after tile has been cloned
+                    setUpHoverEvent();
+
+                } else {
+                    interaction.start({ name: 'drag' }, event.interactable, event.currentTarget);
+                    setUpHoverEvent();
+
+                }
+                socket.emit('tile_duplicated', { room: roomName, id: id, clone: clone })
+            }
+
+            socket.on('tileduplicate', function (data) {
+
+                var target = document.getElementById(data.response.id);
+                var p = $(target);
+                var position = p.position();
+                var clone = target.cloneNode(true);
+                clone.className = clone.className.replace(/\btile-source\b/, 'cloned-tile');
+
+                clone.style.position = "absolute";
+                clone.style.top = position.top + "px";
+                clone.style.left = position.left + "px";
+
+                if (backside.style.display == "none") {
+                    document.getElementsByClassName('section')[0].appendChild(clone);
+                    list = document.getElementsByClassName('cloned-tile');
+                    for (var i = 1; i <= list.length; i++) {
+                        clone.id = target.id + (i + 1);
+                    }
+                } else {
+                    document.getElementsByClassName('section')[5].appendChild(clone);
+                    list = document.getElementsByClassName('cloned-tile');
+                    for (var i = 1; i <= list.length; i++) {
+                        clone.id = target.id + (i + 1);
+                    }
+                }
+            })
+
             function dragMoveListener(event) {
-                //grab object that will be dragged and set in target variable
-                var target = event.target
+                //makes sure that only cloned tiles can be dragged
+                if (event.currentTarget.classList.contains('cloned-tile')) {
 
-                //get the id of the target
-                id = event.currentTarget.id
+                    //grab object that will be dragged and set in target variable
+                    var target = event.target;
 
-                // keep the dragged position in the data-x/data-y attributes 
-                x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx,
-                    y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+                    //get the id of the target
+                    id = event.currentTarget.id;
 
-                // translate the element 
-                target.style.webkitTransform =
-                    target.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
+                    // keep the dragged position in the data-x/data-y attributes 
+                    x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx,
+                        y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
 
-                // update the position attributes 
-                target.setAttribute('data-x', x);
-                target.setAttribute('data-y', y);
+                    // translate the element 
+                    target.style.webkitTransform =
+                        target.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
 
-                //highlight tile 
-                target.classList.remove('magenta');
-                target.classList.add('moving');
+                    // update the position attributes 
+                    target.setAttribute('data-x', x);
+                    target.setAttribute('data-y', y);
+
+                    //highlight tile 
+                    target.classList.remove('magenta');
+                    target.classList.add('moving');
+                }
 
                 socket.emit('tile_clicked', { room: roomName, x: x, y: y, id: id })
             }
 
+            // for when a tile is in movement
             socket.on('server_response', function (data) {
                 var target = document.getElementById(data.response.id);
                 target.setAttribute('data-x', data.response.x);
@@ -95,10 +241,6 @@
                 target.classList.add('moving');
                 target.style.webkitTransform =
                     target.style.transform = 'translate(' + data.response.x + 'px, ' + data.response.y + 'px)';
-
-                //data.response.target.setAttribute('data-x', data.response.x);
-                //data.response.target.setAttribute('data-y', data.response.y);
-
             })
 
             socket.on('deselect', function (data) {
@@ -106,10 +248,31 @@
                 target.classList.remove('moving');
             })
 
-             $("#reset").click(() => {
+            $("#switch").click(() => {
+                socket.emit("switch", { room: roomName })
+                switchboard()
+            })
+
+            $("#reset").click(() => {
                 socket.emit("reset", { room: roomName })
                 setBoard()
             })
+
+            socket.on("reset_tiles", function () {
+                setBoard()
+            })
+
+            //set up the highlight listeners for hover/mouseover event
+            function setUpHoverEvent() {
+                $("div.draggable").hover(function (event) {
+                    $(this).addClass('magenta');
+                    socket.emit("hoveron", { room: roomName, id: event.currentTarget.id });
+                }, function (event) {
+                    $(this).removeClass('magenta');
+                    socket.emit("hoveroff", { room: roomName, id: event.currentTarget.id });
+                }
+                );
+            }
 
             function setBoard() {
                 $.get('http://localhost:8000/tiles').then((tiles) => {
@@ -131,20 +294,11 @@
                     ]
                     renderSet(tileSets)
 
-                    //set up the highlight listeners for hover/mouseover event
-                    $("div.draggable").hover(function (event) {
-                        $(this).addClass('magenta');
-                        socket.emit("hoveron", { room: roomName, id: event.currentTarget.id });
-
-                    }, function (event) {
-                        $(this).removeClass('magenta');
-                        socket.emit("hoveroff", { room: roomName, id: event.currentTarget.id });
-                    }
-                    );
+                    setUpHoverEvent();
 
                     //set up the socket events for hover / mouseover event
                     socket.on('hover_on', (data) => {
-                        var target = document.getElementById(data.response.id)
+                        var target = document.getElementById(data.response.id);
                         target.classList.add('magenta');
                     })
 
@@ -161,7 +315,7 @@
                     $(`#${set.name}`).html('')
                     set.tiles.forEach((tile) => {
                         $(`#${set.name}`).append(
-                            `<div class='draggable ib' id=${tile.text}>
+                            `<div class='tile-source draggable ib' id=${tile.text}>
                         <p class=${tile.color}>
                     ${tile.text}
                         </p >
@@ -173,69 +327,133 @@
 
             setBoard()
 
-            $("#reset").click(() => {
-                socket.emit("reset", { room: roomName })
-                setBoard()
+            socket.on('switch_boards', function () {
+                switchboard()
             })
 
-            socket.on("reset_tiles", function () {
-                setBoard()
-            })
+            function switchboard() {
+                var backside = document.getElementById('backside');
+                var frontside = document.getElementById('frontside');
+
+                if (backside.style.display == "none") {
+                    $('#frontside').hide();
+                    $('#backside').show();
+                }
+                else {
+                    $('#backside').hide();
+                    $('#frontside').show();
+                }
+            }
+
+            /* ================
+            OFFLINE (RED LIGHT)
+            ================ */
+
+            function terminateButtonPressed() {
+                $("#class_over").html("Class is over, thank you!");
+                $("#teacher_light").toggleClass('online');
+                $("#teacher_light").addClass('offline');
+            }
+
+            $("#terminate").click(() => {
+                socket.emit("terminate", {
+                    room: roomName
+                })
+                terminateButtonPressed()
+            });
+
+            socket.on("terminate_by_teacher", function () {
+                terminateButtonPressed()
+            });
+
+            socket.on("user disconnected", function () {
+                console.log("user disconnected from client side");
+                $("#student_light").removeClass('not_paying_attention');
+                $("#student_light").addClass('offline');
+            });
+
         });
+
     </script>
 </head>
 
 <body>
     <div class="container">
         <div id="title">
-            <h2 id="Welcome" name='<%=id %>'>Learning Board</h2>
+            <h2 id="Welcome" name='<%=id %>' admin='<%=admin %>'>Learning Board</h2>
+            <div id="logout_msg"></div>
+
             <% if (admin) {%>
-            <div class="text-right align-top ib">
-                <button class="btn btn-success ib" id="switch">Switch Sides</button>
-                <a href="/admin/dashboard"><button class="btn btn-primary ib">Back to Dashboard</button></a>
-                <button class="btn btn-warning ib" id="reset">Reset Board</button>
-            </div>
-            <% } %>
+                <div id="light">
+                    <div id="student_light"></div>
+                    <h5>Student</h5>
+                </div>
+
+                <div class="text-right align-top ib">
+                    <button class="btn btn-success ib" id="switch">Switch Sides</button>
+                    <!-- <a href="/admin/dashboard">
+                        <button class="btn btn-primary ib">Back to Dashboard</button>
+                    </a> -->
+                    <button class="btn btn-warning ib" id="reset">Reset Board</button>
+                    <a href="http://localhost:8000/admin/dashboard">
+                        <button class="btn btn-danger ib" id="terminate">Terminate</button>
+                    </a>
+                </div>
+
+                <div id="light">
+                    <div id="student_light"></div>
+                    <h5>Student</h5>
+                </div>
+                <% } %>
+
+                    <% if (!admin) {%>
+                        <div id="class_over"></div>
+                        <div id="light">
+                            <div id="teacher_light"></div>
+                            <h5>Teacher</h5>
+                        </div>
+                        <% } %>
+
         </div>
 
-        <h4>Front Side of Board</h4>
-        <div class="frontboard" id="sideone">
-            <div class="section" id="starstop">
-            </div>
-            <div class="section" id="starsleft">
-            </div>
+        <div id="frontside">
+            <h4>Front Side of Board</h4>
+            <div class="bothboards">
+                <div class="frontboard" id="sideone">
+                    <div class="section" id="starstop">
+                    </div>
+                    <div class="section" id="starsleft">
+                    </div>
 
-            <div class="section" id="centerone">
-                <div id="crescent">
-                </div>
-                <div id="dipper">
-                </div>
-                <div id="earth">
+                    <div class="section" id="centerone">
+                        <div id="crescent">
+                        </div>
+                        <div id="dipper">
+                        </div>
+                        <div id="earth">
+                        </div>
+                    </div>
+                    <div class="section" id="starsright">
+                    </div>
+                    <div class="section" id="starsbottom">
+                    </div>
                 </div>
             </div>
-            <div class="section" id="starsright">
-            </div>
-            <div class="section" id="starsbottom">
-            </div>
-
         </div>
 
-
-        <br>
-        <h4>Back Side of Board</h4>
-        <div class="backboard" id="sidetwo">
-
-            <div class="section" id="roots">
+        <div id="backside" style="display: none">
+            <h4>Back Side of Board</h4>
+            <div class="bothboards">
+                <div class="backboard" id="sidetwo">
+                    <div class="section" id="roots"></div>
+                    <div class="section" id="prefixes"></div>
+                    <div class="section" id="endingsright"></div>
+                    <div class="section" id="endingsbottom"></div>
+                </div>
             </div>
-            <div class="section" id="prefixes">
-            </div>
-            <div class="section" id="endingsright">
-            </div>
-            <div class="section" id="endingsbottom">
-            </div>
-
         </div>
     </div>
+
 </body>
 
 

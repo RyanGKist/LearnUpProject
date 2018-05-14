@@ -72,17 +72,18 @@ function addDummyAccounts(dummyUsers) {
 }
 
 User.findOne({ email: 'omar.ihmoda@gmail.com' }, (error, result) => {
-  console.log("In mongoose.js: findOne({omar.ihmoda@gmail.com})");
+  // console.log("In mongoose.js: findOne({omar.ihmoda@gmail.com})");
   if (error) {
     console.log("In mongoose file with error on find user email method:", error);
   } else if (!result) {
-    console.log("In mongoose.js: findOne({omar.ihmoda@gmail.com}) - no result returned, creating default users...");
+    // console.log("In mongoose.js: findOne({omar.ihmoda@gmail.com}) - no result returned, creating default users...");
     addDummyAccounts(users);
   }
 });
 
 // ADD TILES TO DB (if database not yet populated)
-const tiles = require('../../static/tiles.json');
+const tilesSideOne = require('../../static/tilesSideOne.json');
+const tilesSideTwo = require('../../static/tilesSideTwo.json');
 
 const Sideone = mongoose.model('Sideone');
 const Sidetwo = mongoose.model('Sidetwo');
@@ -90,11 +91,11 @@ const Sidetwo = mongoose.model('Sidetwo');
 function addTiles(tiles) {
   const {
     starstop, starsleft, starsright, starsbottom, dipper, crescent, earth,
-  } = tiles.sideone;
+  } = tilesSideOne.sideone;
 
   const {
     prefixes, endingsright, endingsbottom, roots,
-  } = tiles.sidetwo;
+  } = tilesSideTwo.sidetwo;
 
   Sideone.create({
     starstop,
@@ -119,10 +120,13 @@ function addTiles(tiles) {
 }
 
 Sideone.findOne({})
-  .then((tile) => {
-    if (tile) {
-    } else {
+  .then((tiles) => {
       addTiles(tiles);
-    }
+  })
+  .catch(error => console.log(error));
+
+Sidetwo.findOne({})
+  .then((tiles) => {
+      addTiles(tiles);
   })
   .catch(error => console.log(error));
